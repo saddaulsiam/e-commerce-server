@@ -1,26 +1,12 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+import mongoose from "mongoose";
 
-const categorySchema = mongoose.Schema(
+const categorySchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      trim: true,
-      required: [true, "Please provide a category name"],
-      lowercase: true,
-      unique: true,
-    },
-    description: String,
-    icon: {
-      type: String,
-      required: [true, "Please provide a category icon"],
-      validate: [validator.isURL, "Please provide a valid URL"],
-    },
+    name: { type: String, required: true, unique: true },
+    description: { type: String },
+    image: { type: String },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const Category = mongoose.model("Category", categorySchema);
-module.exports = Category;
+module.exports = mongoose.model("Category", categorySchema);

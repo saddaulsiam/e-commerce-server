@@ -1,92 +1,16 @@
-const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Schema.Types;
+import mongoose from "mongoose";
 
-const orderSchema = mongoose.Schema(
+const OrderSchema = new mongoose.Schema(
   {
-    user: {
-      displayName: {
-        type: String,
-        required: true,
-      },
-      email: {
-        type: String,
-        required: true,
-      },
-      id: {
-        type: ObjectId,
-        required: true,
-      },
-    },
-
-    shippingAddress: {
-      name: {
-        type: String,
-        required: true,
-      },
-      email: {
-        type: String,
-      },
-      phone: {
-        type: String,
-        required: true,
-      },
-      region: {
-        type: String,
-        required: true,
-      },
-      city: {
-        type: String,
-        required: true,
-      },
-      area: {
-        type: String,
-        required: true,
-      },
-      address: {
-        type: String,
-        required: true,
-      },
-    },
-
-    products: [{ type: Object }],
-
-    paymentDetails: {
-      type: Object,
-      required: true,
-    },
-
-    orderStatus: {
-      type: String,
-      required: true,
-      enum: {
-        values: ["pending", "reject", "cancel", "delivery"],
-        message: " status can't be {VALUE} ",
-      },
-    },
-    paymentStatus: {
-      type: String,
-      required: true,
-      enum: {
-        values: ["unpaid", "paid"],
-        message: "status can't be {VALUE} ",
-      },
-    },
-
-    total: {
-      type: Number,
-      required: true,
-    },
-
-    orderDate: {
-      type: Date,
-      default: new Date(),
-    },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    totalAmount: { type: Number, required: true },
+    paymentMethod: { type: String, enum: ["cod", "online"], required: true },
+    isPaid: { type: Boolean, required: true, default: false },
+    status: { type: String, enum: ["pending", "processing", "shipped", "delivered", "cancelled"], default: "pending" },
+    shippingAddress: { type: String, required: true },
+    subOrders: [{ type: mongoose.Schema.Types.ObjectId, ref: "SubOrder" }],
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const Order = mongoose.model("Order", orderSchema);
-
-module.exports = Order;
+export default mongoose.model("Order", OrderSchema);
