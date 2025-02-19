@@ -188,3 +188,12 @@ exports.deleteProductById = async (req, res, next) => {
     res.status(200).json(req.files);
   } catch (error) {}
 }; */
+
+export const ProductsController = {
+  createProduct,
+  getAllProducts,
+  updateProduct,
+  getProductById,
+  deleteProduct,
+  getProductsByVendor,
+};

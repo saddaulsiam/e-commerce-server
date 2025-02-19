@@ -1,8 +1,4 @@
-const {
-  getAllCategoriesService,
-  createCategoryService,
-  getCategoryByIdService,
-} = require("./category.service");
+const { getAllCategoriesService, createCategoryService, getCategoryByIdService } = require("./category.service");
 
 exports.createCategory = async (req, res) => {
   try {
@@ -55,4 +51,12 @@ exports.getCategoryById = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+export const CategoriesController = {
+  createCategory,
+  getAllCategories,
+  getCategoryById,
+  updateCategoryById,
+  deleteCategoryById,
 };

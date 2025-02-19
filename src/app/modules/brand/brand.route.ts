@@ -1,14 +1,18 @@
-const router = require("express").Router();
+import express from "express";
+import { BrandsController } from "./brand.controller";
 
-const verifyToken = require("../../middleware/verifyToken");
-const authorization = require("../../middleware/authorization");
-const brandController = require("./brand.controller");
+const router = express.Router();
+
+/* authorization("vendor-admin", "admin"), */
+
+router.route("/")
+.post(BrandsController.createBrand)
+.get(BrandsController.getBrands);
 
 router
-  .route("/")
-  .post(authorization("vendor-admin", "admin"), brandController.createBrand)
-  .get(authorization("customer", "vendor-admin", "admin"), brandController.getBrands);
+  .route("/:id")
+  .get(BrandsController.getBrandById)
+  .put(BrandsController.updateBrandById)
+  .delete(BrandsController.deleteBrandById);
 
-router.route("/:id").get(verifyToken, brandController.getBrandById).patch(verifyToken, brandController.updateBrand);
-
-module.exports = router;
+export const BrandsRoutes = router;

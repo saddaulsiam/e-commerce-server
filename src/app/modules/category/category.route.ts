@@ -1,17 +1,16 @@
-const router = require("express").Router();
+import express from "express";
+import { CategoriesController } from "./category.controller";
 
-const verifyToken = require("../../middleware/verifyToken");
-const authorization = require("../../middleware/authorization");
-const categoryController = require("../controllers/category.controller");
+const router = express.Router();
+
+router.route("/")
+.post(CategoriesController.createCategory)
+.get(CategoriesController.getAllCategories);
 
 router
-  .route("/")
-  .post(
-    authorization("vendor-admin", "admin"),
-    categoryController.createCategory
-  )
-  .get(categoryController.getAllCategories);
+  .route("/:id")
+  .get(CategoriesController.getCategoryById)
+  .put(CategoriesController.updateCategoryById)
+  .delete(CategoriesController.deleteCategoryById);
 
-router.get("/:id", verifyToken, categoryController.getCategoryById);
-
-module.exports = router;
+export const CategoriesRoutes = router;

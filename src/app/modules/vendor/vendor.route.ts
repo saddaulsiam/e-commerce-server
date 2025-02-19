@@ -1,20 +1,19 @@
-const router = require("express").Router();
+import express from "express";
+import { VendorsController } from "./vendor.controller";
 
-const authorization = require("../../middleware/authorization");
-const vendorController = require("./vendor.controller");
-const verifyToken = require("../../middleware/verifyToken");
+const router = express.Router();
 
 router
   .route("/")
-  .post(vendorController.registerVendor)
-  .get(authorization("admin"), vendorController.getAllVendors);
+  .post(VendorsController.createVendor) // Create a new vendor
+  .get(VendorsController.getAllVendors); // Get all vendors
 
 router
-  .route("/:email")
-  .delete(authorization("vendor-admin", "admin"), vendorController.deleteVendor)
-  .get(vendorController.getMyVendor);
+  .route("/:id")
+  .put(VendorsController.getVendorById) // Get vendor by ID
+  .get(VendorsController.updateVendor) // Update a vendor
+  .delete(VendorsController.deleteVendor); // Delete a vendor
 
-router.get("/me/:email");
-router.get("/:name", verifyToken, vendorController.getVendorByName);
+router.get("/vendor/:vendorId", VendorsController.getVendorProducts); // Get products by vendor
 
-module.exports = router;
+export const VendorsRoutes = router;

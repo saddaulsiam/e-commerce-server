@@ -99,3 +99,11 @@ exports.updateBrand = async (req, res, next) => {
     });
   }
 };
+
+export const BrandsController = {
+  createBrand,
+  getBrands,
+  getBrandById,
+  updateBrandById,
+  deleteBrandById,
+};

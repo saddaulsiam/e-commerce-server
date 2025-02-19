@@ -1,19 +1,19 @@
-const router = require("express").Router();
+import express from "express";
+import { ProductsController } from "./product.controller";
 
-const authorization = require("../../middleware/authorization");
-const productController = require("./product.controller");
+const router = express.Router();
 
 router
   .route("/")
-  .post(authorization("vendor-admin", "admin"), productController.createProduct)
-  .get(productController.getProducts);
+  .post(ProductsController.createProduct) // Create a new product
+  .get(ProductsController.getAllProducts); // Get all products
 
 router
   .route("/:id")
-  .get(productController.getProductById)
-  .patch(authorization("vendor-admin", "admin"), productController.updateProductById)
-  .delete(authorization("vendor-admin", "admin"), productController.deleteProductById);
+  .get(ProductsController.getProductById) // Get product by ID
+  .put(ProductsController.updateProduct) // Update a product
+  .delete(ProductsController.deleteProduct); // Delete a product
 
-// router.route("/bulk-update").patch(productController.bulkUpdateProduct);
-// router.route("/bulk-delete").delete(productController.bulkDeleteProduct);
-module.exports = router;
+router.get("/vendor/:vendorId", ProductsController.getProductsByVendor); // Get products by vendor
+
+export const ProductsRoutes = router;

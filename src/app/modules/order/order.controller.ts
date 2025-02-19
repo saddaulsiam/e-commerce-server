@@ -33,10 +33,7 @@ exports.getOrders = async (req, res, next) => {
 
     //gt ,lt ,gte .lte
     let filtersString = JSON.stringify(filters);
-    filtersString = filtersString.replace(
-      /\b(gt|gte|lt|lte)\b/g,
-      (match) => `$${match}`
-    );
+    filtersString = filtersString.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
 
     filters = JSON.parse(filtersString);
 
@@ -111,4 +108,13 @@ exports.getMyOrdersByEmail = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+export const OrdersController = {
+  createOrder,
+  getAllOrders,
+  getUserOrders,
+  getOrderById,
+  updateOrderStatus,
+  makePayment,
 };

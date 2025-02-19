@@ -1,20 +1,19 @@
-const router = require("express").Router();
+import express from "express";
+import { OrdersController } from "./order.controller";
 
-const verifyToken = require("../../middleware/verifyToken");
-const orderController = require("../controllers/order.controller");
-const authorization = require("../../middleware/authorization");
+const router = express.Router();
 
 router
   .route("/")
-  .post(verifyToken, orderController.orderNow)
-  .get(authorization("vendor-admin", "admin"), orderController.getOrders);
+  .post(OrdersController.createOrder) // Create a new order
+  .get(OrdersController.getAllOrders); // Get all orders (for Admin)
 
-router.get("/:id", verifyToken, orderController.getOrderById);
+router.get("/user/:userId", OrdersController.getUserOrders); // Get orders for a specific user
 
-router.get(
-  "/my/:email",
-  authorization("customer", "vendor-admin", "admin"),
-  orderController.getMyOrdersByEmail
-);
+router.get("/:id", OrdersController.getOrderById); // Get order by ID
 
-module.exports = router;
+router.put("/:id/status", OrdersController.updateOrderStatus); // Update order status
+
+router.put("/:id/payment", OrdersController.makePayment); // Update payment status
+
+export const OrdersRoutes = router;

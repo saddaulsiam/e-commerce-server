@@ -112,3 +112,12 @@ exports.getVendorByName = async (req, res) => {
     });
   }
 };
+
+export const VendorsController = {
+  createVendor,
+  getAllVendors,
+  getVendorById,
+  updateVendor,
+  deleteVendor,
+  getVendorProducts,
+};
