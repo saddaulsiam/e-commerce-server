@@ -1,193 +1,84 @@
-const {
-  getProductsService,
-  createProductService,
-  updateProductByIdService,
-  bulkUpdateProductService,
-  deleteProductByIdService,
-  bulkDeleteProductService,
-  getProductByIdService,
-} = require("./product.service");
+import httpStatus from "http-status";
+import catchAsync from "../../../shared/catchAsync";
+import sendResponse from "../../../shared/sendResponse";
+import { ProductsServices } from "./product.service";
 
-exports.createProduct = async (req, res, next) => {
-  try {
-    const result = await createProductService(req.body);
+// Create a new product
+const createProduct = catchAsync(async (req, res) => {
+  const result = await ProductsServices.createProductService(req.body);
 
-    res.status(200).json({
-      status: "success",
-      message: "Product created successfully!",
-      data: result,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      status: "fail",
-      message: "Product is not inserted ",
-      error: error.message,
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Product created successfully!",
+    data: result,
+  });
+});
 
-exports.getProducts = async (req, res, next) => {
-  try {
-    let filters = { ...req.query };
+// Get all products
+const getAllProducts = catchAsync(async (req, res) => {
+  const result = await ProductsServices.getAllProductsService();
 
-    if (filters.search?.length) {
-      filters = {
-        $text: {
-          $search: filters.search,
-        },
-      };
-    }
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Products retrieved successfully!",
+    data: result,
+  });
+});
 
-    //sort , page , limit -> exclude
-    const excludeFields = ["sort", "page", "limit"];
-    excludeFields.forEach((field) => delete filters[field]);
+// Get product by ID
+const getProductById = catchAsync(async (req, res) => {
+  const productId = req.params.id;
+  const result = await ProductsServices.getProductByIdService(productId);
 
-    //gt ,lt ,gte .lte
-    let filtersString = JSON.stringify(filters);
-    filtersString = filtersString.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Product retrieved successfully!",
+    data: result,
+  });
+});
 
-    filters = JSON.parse(filtersString);
+// Update product
+const updateProduct = catchAsync(async (req, res) => {
+  const productId = req.params.id;
+  const updateData = req.body;
+  const result = await ProductsServices.updateProductService(productId, updateData);
 
-    const queries = {};
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Product updated successfully!",
+    data: result,
+  });
+});
 
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(",").join(" ");
-      queries.sortBy = sortBy;
-    }
+// Delete product
+const deleteProduct = catchAsync(async (req, res) => {
+  const productId = req.params.id;
+  const result = await ProductsServices.deleteProductService(productId);
 
-    if (req.query.fields) {
-      const fields = req.query.fields.split(",").join(" ");
-      queries.fields = fields;
-    }
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Product deleted successfully!",
+    data: result,
+  });
+});
 
-    if (req.query.page) {
-      const { page = 1, limit = 10 } = req.query;
+// Get products by vendor ID
+const getProductsByVendor = catchAsync(async (req, res) => {
+  const vendorId = req.params.vendorId;
+  const result = await ProductsServices.getProductsByVendorService(vendorId);
 
-      const skip = (page - 1) * parseInt(limit);
-      queries.skip = skip;
-      queries.limit = parseInt(limit);
-    }
-
-    const products = await getProductsService(filters, queries);
-
-    res.status(200).json({
-      status: "success",
-      data: products,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "can't get the data",
-      error: error.message,
-    });
-  }
-};
-
-exports.getProductById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const result = await getProductByIdService(id);
-
-    res.status(200).json({
-      status: "success",
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't get the product",
-      error: error.message,
-    });
-  }
-};
-
-exports.updateProductById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const result = await updateProductByIdService(id, req.body);
-
-    res.status(200).json({
-      status: "success",
-      message: "Successfully updated the product",
-      result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't update the product",
-      error: error.message,
-    });
-  }
-};
-
-exports.deleteProductById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    const result = await deleteProductByIdService(id);
-
-    if (!result.deletedCount) {
-      return res.status(400).json({
-        status: "fail",
-        error: "Couldn't delete the product",
-      });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "Successfully deleted the product",
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't delete the product",
-      error: error.message,
-    });
-  }
-};
-
-/* exports.bulkUpdateProduct = async (req, res, next) => {
-  try {
-    console.log(req.body);
-    const result = await bulkUpdateProductService(req.body);
-
-    res.status(200).json({
-      stauts: "success",
-      message: "Successfully updated the product",
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't update the product",
-      error: error.message,
-    });
-  }
-}; */
-
-/* exports.bulkDeleteProduct = async (req, res, next) => {
-  try {
-    console.log(req.body);
-    const result = await bulkDeleteProductService(req.body.ids);
-
-    res.status(200).json({
-      stauts: "success",
-      message: "Successfully deleted the given products",
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't delete the given products",
-      error: error.message,
-    });
-  }
-}; */
-
-/* exports.fileUpload = async (req, res) => {
-  try {
-    res.status(200).json(req.files);
-  } catch (error) {}
-}; */
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Products by vendor retrieved successfully!",
+    data: result,
+  });
+});
 
 export const ProductsController = {
   createProduct,

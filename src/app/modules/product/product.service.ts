@@ -1,80 +1,77 @@
-const Product = require("../models/Product");
-const Brand = require("../models/Brand");
-const Category = require("../models/Category");
+import httpStatus from "http-status";
+import ApiError from "../../errors/ApiError";
+import Product from "../../Schema/Product";
+import { TProduct } from "../../interface/product";
 
-exports.createProductService = async (data) => {
-  const product = await Product.create(data);
-  const { _id: productId, brand, category } = product;
+//! Create a new product
+export const createProductService = async (productData: TProduct) => {
+  const { name, vendorId } = productData;
 
-  //update Brand
-  await Brand.updateOne({ _id: brand.id }, { $push: { products: productId } });
+  // Check if product already exists
+  const existingProduct = await Product.findOne({ name, vendorId });
+  if (existingProduct) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Product already exists");
+  }
 
-  //update category
-  await Category.updateOne(
-    { _id: category.id },
-    { $push: { products: productId } }
-  );
+  // Create new product
+  const newProduct = await Product.create(productData);
 
+  return newProduct;
+};
+
+//! Get all products
+export const getAllProductsService = async () => {
+  const products = await Product.find();
+  return products;
+};
+
+//! Get product by ID
+export const getProductByIdService = async (productId: string) => {
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+  }
   return product;
 };
 
-exports.getProductsService = async (filters, queries) => {
-  const products = await Product.find(filters)
-    .skip(queries.skip)
-    .limit(queries.limit)
-    .select(queries.fields)
-    .sort(queries.sortBy)
-    .populate("category.id")
-    .populate("supplier.id")
-    .populate("brand.id");
+//! Update product
+export const updateProductService = async (productId: string, updateData: Partial<TProduct>) => {
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+  }
 
-  const total = await Product.countDocuments(filters);
-  const page = Math.ceil(total / queries.limit);
-  return { total, page, products };
+  // Update product
+  const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
+  return updatedProduct;
 };
 
-exports.getProductByIdService = async (id) => {
-  const product = await Product.findById({ _id: id });
-  return product;
+//! Delete product
+export const deleteProductService = async (productId: string) => {
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+  }
+
+  // Delete the product
+  await Product.findByIdAndDelete(productId);
+  return { message: "Product deleted successfully" };
 };
 
-exports.updateProductByIdService = async (productId, data) => {
-  const result = await Product.updateOne(
-    { _id: productId },
-    { $set: data },
-    {
-      runValidators: true,
-    }
-  );
-
-  return result;
+//! Get products by vendor ID
+export const getProductsByVendorService = async (vendorId: string) => {
+  const products = await Product.find({ vendorId });
+  if (!products.length) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No products found for this vendor");
+  }
+  return products;
 };
 
-exports.deleteProductByIdService = async (id) => {
-  const result = await Product.deleteOne({ _id: id });
-  return result;
+export const ProductsServices = {
+  createProductService,
+  getAllProductsService,
+  updateProductService,
+  getProductByIdService,
+  deleteProductService,
+  getProductsByVendorService,
 };
-
-/* exports.bulkUpdateProductService = async (data) => {
-  // console.log(data.ids,data.data)
-  // const result = await Product.updateMany({ _id: data.ids }, data.data, {
-  //     runValidators: true
-  // });
-
-  const products = [];
-
-  data.ids.forEach((product) => {
-    products.push(Product.updateOne({ _id: product.id }, product.data));
-  });
-
-  const result = await Promise.all(products);
-  console.log(result);
-
-  return result;
-}; */
-
-/* exports.bulkDeleteProductService = async (ids) => {
-  const result = await Product.deleteMany({ _id: ids });
-
-  return result;
-}; */
