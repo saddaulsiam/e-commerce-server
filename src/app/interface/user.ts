@@ -1,7 +1,7 @@
 import { Document, Types } from "mongoose";
 
 export interface TUser extends Document {
-  name: string;
+  displayName: string;
   phoneNumber: string;
   email: string;
   password: string;

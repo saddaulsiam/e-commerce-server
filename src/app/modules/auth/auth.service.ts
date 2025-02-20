@@ -7,7 +7,7 @@ import { TUser } from "../../interface/user";
 
 //! Register a new user
 export const registerService = async (userData: TUser) => {
-  const { name, email, phoneNumber, password, role } = userData;
+  const { displayName, email, phoneNumber, password, role } = userData;
 
   // Check if user already exists
   const existingUser = await User.findOne({ email });
@@ -20,11 +20,11 @@ export const registerService = async (userData: TUser) => {
 
   // Create new user
   const newUser = await User.create({
-    name,
+    displayName,
     email,
     phoneNumber,
     password: hashedPassword,
-    role: role || "user",
+    role: role || "customer",
     isEmailVerified: false,
   });
 
