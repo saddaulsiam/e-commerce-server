@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const AdminSchema = new mongoose.Schema(
+const adminSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     phoneNumber: { type: String, required: true },
@@ -13,4 +13,4 @@ const AdminSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Admin", AdminSchema);
+export default mongoose.model("Admin", adminSchema);

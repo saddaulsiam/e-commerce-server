@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const ProfileSchema = new mongoose.Schema(
+const profileSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     address: [
@@ -17,4 +17,4 @@ const ProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Profile", ProfileSchema);
+export default mongoose.model("Profile", profileSchema);
