@@ -1,104 +1,66 @@
-const {
-  createBrandService,
-  getBrandsService,
-  getBrandByIdService,
-  updateBrandService,
-  getBrandByNameService,
-} = require("./brand.service");
+import httpStatus from "http-status";
+import catchAsync from "../../../shared/catchAsync";
+import sendResponse from "../../../shared/sendResponse";
+import { BrandServices } from "./brand.service";
 
-exports.createBrand = async (req, res) => {
-  try {
-    const brandNameExists = await getBrandByNameService(req.body.name);
+const createBrand = catchAsync(async (req, res) => {
+  const result = await BrandServices.createBrandService(req.body);
 
-    if (brandNameExists) {
-      return res.status(500).json({
-        status: "fail",
-        message: "This store name already exists",
-      });
-    }
-    const result = await createBrandService(req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Brand created successfully!",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      status: "success",
-      message: "Successfully created the brand",
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      error: error,
-    });
-  }
-};
+const getBrands = catchAsync(async (req, res) => {
+  const result = await BrandServices.getBrandsService();
 
-exports.getBrands = async (req, res, next) => {
-  try {
-    const brands = await getBrandsService(req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Brands retrieved successfully!",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      status: "success",
-      data: brands,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      status: "fail",
-      error: "Couldn't get the brands",
-    });
-  }
-};
+const getBrandById = catchAsync(async (req, res) => {
+  const brandId = req.params.id;
+  const result = await BrandServices.getBrandByIdService(brandId);
 
-exports.getBrandById = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const brand = await getBrandByIdService(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Brand retrieved successfully!",
+    data: result,
+  });
+});
 
-    if (!brand) {
-      return res.status(400).json({
-        status: "fail",
-        error: "Couldn't find a brand with this id",
-      });
-    }
+const updateBrandById = catchAsync(async (req, res) => {
+  const brandId = req.params.id;
+  const updateData = req.body;
+  const result = await BrandServices.updateBrandService(brandId, updateData);
 
-    res.status(200).json({
-      status: "success",
-      data: brand,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      status: "fail",
-      error: "Couldn't get the brands",
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Brand updated successfully!",
+    data: result,
+  });
+});
 
-exports.updateBrand = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const result = await updateBrandService(id, req.body);
+const deleteBrandById = catchAsync(async (req, res) => {
+  const brandId = req.params.id;
+  const result = await BrandServices.deleteBrandService(brandId);
 
-    console.log(result);
-
-    if (!result.nModified) {
-      return res.status(400).json({
-        status: "fail",
-        error: "Couldn't update the brand with this id",
-      });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "Successfully updated the brand",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      status: "fail",
-      error: "Couldn't update the brand",
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Brand deleted successfully!",
+    data: result,
+  });
+});
 
 export const BrandsController = {
   createBrand,
