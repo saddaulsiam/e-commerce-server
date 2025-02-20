@@ -13,7 +13,7 @@ export interface TUser extends Document {
 }
 
 export interface TAddress {
-  region: string;
+  street: string;
   city: string;
   area: string;
   fullAddress: string;

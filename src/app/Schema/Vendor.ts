@@ -8,7 +8,7 @@ const vendorSchema = new mongoose.Schema(
     storeLogo: { type: String },
     storeBanner: { type: String },
     address: {
-      region: { type: String, required: true },
+      street: { type: String, required: true },
       city: { type: String, required: true },
       area: { type: String, required: true },
       fullAddress: { type: String, required: true },

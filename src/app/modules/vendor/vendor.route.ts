@@ -1,11 +1,13 @@
 import express from "express";
 import { VendorsController } from "./vendor.controller";
+import validateRequest from "../../middleware/validateRequest";
+import { VendorValidation } from "./vendor.validation";
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(VendorsController.createVendor) // Create a new vendor
+  .post(validateRequest(VendorValidation.createVendor), VendorsController.createVendor) // Create a new vendor
   .get(VendorsController.getAllVendors); // Get all vendors
 
 router
