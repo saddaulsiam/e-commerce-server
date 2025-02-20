@@ -2,16 +2,15 @@ import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import User from "../../Schema/User";
 import AppError from "../../errors/AppError";
-import { TUser } from "../user/user.interface";
 import { generateToken } from "../../utils/token";
+import { TUser } from "../user/user.interface";
 
 //! Register a new user
 export const registerService = async (userData: TUser) => {
-  const { displayName, email, phoneNumber, password, role } = userData;
+  const { displayName, phoneNumber, email, password, role } = userData;
 
   // Check if user already exists
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
+  if (await User.findOne({ email })) {
     throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
   }
 
@@ -36,7 +35,7 @@ export const loginService = async (loginData: TUser) => {
   const { email, password } = loginData;
 
   // Check if user exists
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate("profile");
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, "User not found!");
   }

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Profile from "./Profile"; // Import Profile model
 
 const userSchema = new mongoose.Schema(
   {
@@ -12,5 +13,20 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ✅ Automatically create a Profile when a new User is registered
+userSchema.post("save", async function (doc) {
+  if (!doc.profile) {
+    const profile = await Profile.create({
+      userId: doc._id,
+      address: [],
+      photo: "",
+      orders: [],
+    });
+
+    doc.profile = profile._id;
+    await doc.save();
+  }
+});
 
 export default mongoose.model("User", userSchema);
