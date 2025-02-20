@@ -1,117 +1,85 @@
-const {
-  getAllVendorsService,
-  createVendorService,
-  getVendorByEmailService,
-  getVendorByNameService,
-  deleteVendorsService,
-} = require("../services/vendor.service");
+import httpStatus from "http-status";
+import catchAsync from "../../../shared/catchAsync";
+import sendResponse from "../../../shared/sendResponse";
+import { VendorsServices } from "./vendor.service";
 
-exports.registerVendor = async (req, res) => {
-  try {
-    const { email, storeName } = req.body;
+// Create Vendor
+const createVendor = catchAsync(async (req, res) => {
+  const vendorData = req.body;
+  const result = await VendorsServices.createVendorService(vendorData);
 
-    const vendorNameExists = await getVendorByNameService(storeName);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Vendor created successfully!",
+    data: result,
+  });
+});
 
-    if (vendorNameExists) {
-      return res.status(500).json({
-        status: "fail",
-        message: "This store name already exists",
-      });
-    }
+// Get all vendors
+const getAllVendors = catchAsync(async (req, res) => {
+  const result = await VendorsServices.getAllVendorsService();
 
-    // const vendorEmailExists = await getVendorByEmailService(email);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Vendors retrieved successfully!",
+    data: result,
+  });
+});
 
-    // if (vendorEmailExists) {
-    //   return res.status(500).json({
-    //     status: "fail",
-    //     error: "This email already exists",
-    //   });
-    // }
+// Get vendor by ID
+const getVendorById = catchAsync(async (req, res) => {
+  const vendorId = req.params.id;
+  const result = await VendorsServices.getVendorByIdService(vendorId);
 
-    const vendor = await createVendorService(req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Vendor retrieved successfully!",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      status: "success",
-      message: "vendor created successfully!",
-      data: vendor,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't create vendor",
-      error: error.message,
-    });
-  }
-};
+// Update vendor by ID
+const updateVendor = catchAsync(async (req, res) => {
+  const vendorId = req.params.id;
+  const updateData = req.body;
+  const result = await VendorsServices.updateVendorService(vendorId, updateData);
 
-exports.getMyVendor = async (req, res) => {
-  try {
-    const user = await getVendorByEmailService(req.params.email);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Vendor updated successfully!",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      status: "success",
-      user,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "fail",
-      error,
-    });
-  }
-};
+// Delete vendor by ID
+const deleteVendor = catchAsync(async (req, res) => {
+  const vendorId = req.params.id;
+  const result = await VendorsServices.deleteVendorService(vendorId);
 
-exports.deleteVendor = async (req, res) => {
-  try {
-    const id = req.params.id;
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Vendor deleted successfully!",
+    data: result,
+  });
+});
 
-    await deleteVendorsService(id);
+// Get products by vendor
+const getVendorProducts = catchAsync(async (req, res) => {
+  const vendorId = req.params.id;
+  const result = await VendorsServices.getVendorProductsService(vendorId);
 
-    res.status(200).json({
-      status: "success",
-      message: "vendor delete successfully!",
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't delete vendor",
-      error: error.message,
-    });
-  }
-};
-
-exports.getAllVendors = async (req, res) => {
-  try {
-    const vendors = await getAllVendorsService();
-
-    res.status(200).json({
-      status: "success",
-      data: vendors,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Can't get the vendors",
-      error: error.message,
-    });
-  }
-};
-
-exports.getVendorByName = async (req, res) => {
-  try {
-    const vendor = await getVendorByNameService(req.params.name);
-
-    res.status(200).json({
-      status: "success",
-      data: vendor,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Can't get the vendor",
-      error: error.message,
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Vendor products retrieved successfully!",
+    data: result,
+  });
+});
 
 export const VendorsController = {
   createVendor,
