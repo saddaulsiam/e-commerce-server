@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const SubOrderSchema = new mongoose.Schema(
   {
-    parentOrderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true },
+    orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true },
     vendorId: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor", required: true },
     items: [
       {

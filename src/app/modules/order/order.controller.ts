@@ -1,114 +1,72 @@
-const {
-  orderNowService,
-  getOrdersService,
-  getOrderByIdService,
-  getMyOrdersByEmailService,
-} = require("./order.service");
+import httpStatus from "http-status";
+import catchAsync from "../../../shared/catchAsync";
+import sendResponse from "../../../shared/sendResponse";
+import { OrderServices } from "./order.service";
 
-exports.orderNow = async (req, res) => {
-  try {
-    const result = await orderNowService(req.body);
+const createOrder = catchAsync(async (req, res) => {
+  const result = await OrderServices.createOrderService(req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Order created successfully!",
+    data: result,
+  });
+});
 
-    res.status(200).json({
-      status: "success",
-      message: "Order successfully Done",
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "Couldn't place the order",
-      error: error.message,
-    });
-  }
-};
+const getAllOrders = catchAsync(async (req, res) => {
+  const result = await OrderServices.getAllOrdersService();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Fetched all orders successfully!",
+    data: result,
+  });
+});
 
-exports.getOrders = async (req, res, next) => {
-  try {
-    let filters = { ...req.query };
+const getUserOrders = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const result = await OrderServices.getUserOrdersService(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Fetched user orders successfully!",
+    data: result,
+  });
+});
 
-    //sort , page , limit -> exclude
-    const excludeFields = ["sort", "page", "limit"];
-    excludeFields.forEach((field) => delete filters[field]);
+const getOrderById = catchAsync(async (req, res) => {
+  const { orderId } = req.params;
+  const result = await OrderServices.getOrderByIdService(orderId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Fetched order details successfully!",
+    data: result,
+  });
+});
 
-    //gt ,lt ,gte .lte
-    let filtersString = JSON.stringify(filters);
-    filtersString = filtersString.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
+const updateOrderStatus = catchAsync(async (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+  const result = await OrderServices.updateOrderStatusService(orderId, status);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Order status updated successfully!",
+    data: result,
+  });
+});
 
-    filters = JSON.parse(filtersString);
-
-    const queries = {};
-
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(",").join(" ");
-      queries.sortBy = sortBy;
-      console.log(sortBy);
-    }
-
-    if (req.query.fields) {
-      const fields = req.query.fields.split(",").join(" ");
-      queries.fields = fields;
-      console.log(fields);
-    }
-
-    if (req.query.page) {
-      const { page = 1, limit = 10 } = req.query;
-
-      const skip = (page - 1) * parseInt(limit);
-      queries.skip = skip;
-      queries.limit = parseInt(limit);
-    }
-
-    const orders = await getOrdersService(filters, queries);
-
-    res.status(200).json({
-      status: "success",
-      data: orders,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "can't get the data",
-      error: error.message,
-    });
-  }
-};
-
-exports.getOrderById = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const order = await getOrderByIdService(id);
-
-    res.status(200).json({
-      status: "success",
-      data: order,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "can't get the data",
-      error: error.message,
-    });
-  }
-};
-
-exports.getMyOrdersByEmail = async (req, res) => {
-  try {
-    const email = req.params.email;
-    const orders = await getMyOrdersByEmailService(email);
-
-    res.status(200).json({
-      status: "success",
-      data: orders,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "can't get the orders",
-      error: error.message,
-    });
-  }
-};
+// const makePayment = catchAsync(async (req, res) => {
+//   const { orderId, paymentDetails } = req.body;
+//   const result = await OrderServices.makePaymentService(orderId, paymentDetails);
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: "Payment processed successfully!",
+//     data: result,
+//   });
+// });
 
 export const OrdersController = {
   createOrder,
@@ -116,5 +74,5 @@ export const OrdersController = {
   getUserOrders,
   getOrderById,
   updateOrderStatus,
-  makePayment,
+  // makePayment,
 };
