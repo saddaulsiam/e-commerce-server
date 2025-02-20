@@ -1,8 +1,8 @@
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 import { TBrand } from "./brand";
 import { TCategory } from "./category";
 
-export type TProduct = {
+export interface TProduct extends Document {
   vendorId: Types.ObjectId;
   name: string;
   description: string;
@@ -13,4 +13,4 @@ export type TProduct = {
   images: string[];
   createdAt: Date;
   updatedAt: Date;
-};
+}

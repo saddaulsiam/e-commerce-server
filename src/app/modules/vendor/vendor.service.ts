@@ -2,38 +2,29 @@ import ApiError from "../../errors/ApiError";
 import Vendor from "../../Schema/Vendor";
 import Product from "../../Schema/Product";
 import httpStatus from "http-status";
+import { TVendor } from "../../interface/vendor";
 
-// Create Vendor
-export const createVendorService = async (vendorData: any) => {
-  const { userId, storeName, storeDescription, storeLogo, storeBanner, address } = vendorData;
-
+//! Create Vendor
+export const createVendorService = async (vendorData: TVendor) => {
   // Check if vendor already exists
-  const existingVendor = await Vendor.findOne({ userId });
+  const existingVendor = await Vendor.findOne({ userId: vendorData.userId });
   if (existingVendor) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Vendor already exists");
   }
 
   // Create new vendor
-  const newVendor = await Vendor.create({
-    userId,
-    storeName,
-    storeDescription,
-    storeLogo,
-    storeBanner,
-    address,
-    earnings: 0,
-  });
+  const newVendor = await Vendor.create(vendorData);
 
   return newVendor;
 };
 
-// Get all vendors
+//! Get all vendors
 export const getAllVendorsService = async () => {
   const vendors = await Vendor.find();
   return vendors;
 };
 
-// Get vendor by ID
+//! Get vendor by ID
 export const getVendorByIdService = async (vendorId: string) => {
   const vendor = await Vendor.findById(vendorId);
   if (!vendor) {
@@ -42,8 +33,8 @@ export const getVendorByIdService = async (vendorId: string) => {
   return vendor;
 };
 
-// Update vendor by ID
-export const updateVendorService = async (vendorId: string, updateData: any) => {
+//! Update vendor by ID
+export const updateVendorService = async (vendorId: string, updateData: Partial<TVendor>) => {
   const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, updateData, { new: true });
   if (!updatedVendor) {
     throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
@@ -51,7 +42,7 @@ export const updateVendorService = async (vendorId: string, updateData: any) => 
   return updatedVendor;
 };
 
-// Delete vendor by ID
+//! Delete vendor by ID
 export const deleteVendorService = async (vendorId: string) => {
   const deletedVendor = await Vendor.findByIdAndDelete(vendorId);
   if (!deletedVendor) {
@@ -60,7 +51,7 @@ export const deleteVendorService = async (vendorId: string) => {
   return { message: "Vendor deleted successfully" };
 };
 
-// Get products by vendor
+//! Get products by vendor
 export const getVendorProductsService = async (vendorId: string) => {
   const products = await Product.find({ vendorId });
   return products;

@@ -12,7 +12,7 @@ export interface TUser extends Document {
   updatedAt: Date;
 }
 
-export interface Address {
+export interface TAddress {
   region: string;
   city: string;
   area: string;
@@ -21,7 +21,7 @@ export interface Address {
 
 export interface TProfile extends Document {
   userId: Types.ObjectId;
-  address: Address[];
+  address: TAddress[];
   photo: string;
   orders: Types.ObjectId[];
   createdAt: Date;
