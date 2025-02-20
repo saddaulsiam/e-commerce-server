@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
-import { TAdmin } from "../../interface/admin";
 import Admin from "../../Schema/Admin";
 import { generateToken } from "../../utils/token";
+import { TAdmin } from "./admin.interface";
 
 //!  Register a new admin
 export const registerAdminService = async (userData: TAdmin) => {

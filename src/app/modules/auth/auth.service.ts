@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import User from "../../Schema/User";
 import AppError from "../../errors/AppError";
-import { TUser } from "../../interface/user";
+import { TUser } from "../user/user.interface";
 import { generateToken } from "../../utils/token";
 
 //! Register a new user

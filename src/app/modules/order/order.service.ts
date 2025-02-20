@@ -2,7 +2,7 @@ import httpStatus from "http-status";
 import Order from "../../Schema/Order";
 import SubOrder from "../../Schema/SubOrder";
 import AppError from "../../errors/AppError";
-import { TOrder } from "../../interface/order";
+import { TOrder } from "./order.interface";
 
 export const createOrderService = async (orderData: TOrder) => {
   const { subOrders, ...orderDetails } = orderData;

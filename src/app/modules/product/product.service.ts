@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import Product from "../../Schema/Product";
-import { TProduct } from "../../interface/product";
+import { TProduct } from "./product.interface";
 
 //! Create a new product
 export const createProductService = async (productData: TProduct) => {

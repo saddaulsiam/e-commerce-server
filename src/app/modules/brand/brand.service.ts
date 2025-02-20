@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
-import { TBrand } from "../../interface/brand";
+import { TBrand } from "./brand.interface";
 import Brand from "../../Schema/Brand";
 
 //! Create a new brand

@@ -1,4 +1,3 @@
-import { TProfile } from "./user";
 
 export interface TAdmin {
   displayName: string;

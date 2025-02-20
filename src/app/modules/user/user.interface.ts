@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { USER_ROLE } from "./user.constant";
 
 export interface TUser extends Document {
   displayName: string;
@@ -27,3 +28,5 @@ export interface TProfile extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type TUserRole = keyof typeof USER_ROLE;

@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
-import { TCategory } from "../../interface/category";
+import { TCategory } from "./category.interface";
 import Category from "../../Schema/Category";
 
 //! Create a new category

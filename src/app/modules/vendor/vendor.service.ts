@@ -2,7 +2,7 @@ import AppError from "../../errors/AppError";
 import Vendor from "../../Schema/Vendor";
 import Product from "../../Schema/Product";
 import httpStatus from "http-status";
-import { TVendor } from "../../interface/vendor";
+import { TVendor } from "./vendor.interface";
 
 //! Create Vendor
 export const createVendorService = async (vendorData: TVendor) => {
