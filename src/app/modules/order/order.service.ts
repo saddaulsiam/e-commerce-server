@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import Order from "../../Schema/Order";
 import SubOrder from "../../Schema/SubOrder";
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import { TOrder } from "../../interface/order";
 
 export const createOrderService = async (orderData: TOrder) => {
@@ -9,7 +9,7 @@ export const createOrderService = async (orderData: TOrder) => {
 
   // Validate if subOrders exists and has valid data
   if (!subOrders || subOrders.length === 0) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Order must have at least one sub-order");
+    throw new AppError(httpStatus.BAD_REQUEST, "Order must have at least one sub-order");
   }
 
   // Create the main order first
@@ -42,7 +42,7 @@ export const getAllOrdersService = async () => {
 export const getUserOrdersService = async (userId: string) => {
   const orders = await Order.find({ userId }).populate("subOrders");
   if (!orders) {
-    throw new ApiError(httpStatus.NOT_FOUND, "No orders found for this user");
+    throw new AppError(httpStatus.NOT_FOUND, "No orders found for this user");
   }
   return orders;
 };
@@ -50,7 +50,7 @@ export const getUserOrdersService = async (userId: string) => {
 export const getOrderByIdService = async (orderId: string) => {
   const order = await Order.findById(orderId).populate("subOrders");
   if (!order) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Order not found");
   }
   return order;
 };
@@ -59,7 +59,7 @@ export const updateOrderStatusService = async (orderId: string, status: string) 
   const updatedOrder = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
 
   if (!updatedOrder) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Order not found");
   }
   return updatedOrder;
 };
@@ -68,7 +68,7 @@ export const updateOrderStatusService = async (orderId: string, status: string) 
 //   const order = await Order.findById(orderId);
 
 //   if (!order) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
+//     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
 //   }
 
 //   // Update payment status and details

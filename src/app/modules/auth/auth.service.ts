@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import { generateToken } from "../../../utils/token";
 import User from "../../Schema/User";
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import { TUser } from "../../interface/user";
 
 //! Register a new user
@@ -12,7 +12,7 @@ export const registerService = async (userData: TUser) => {
   // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User already exists");
+    throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
   }
 
   // Hash password
@@ -38,13 +38,13 @@ export const loginService = async (loginData: TUser) => {
   // Check if user exists
   const user = await User.findOne({ email });
   if (!user) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "User not found!");
+    throw new AppError(httpStatus.UNAUTHORIZED, "User not found!");
   }
 
   // Check password
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
   }
 
   // Generate JWT Token

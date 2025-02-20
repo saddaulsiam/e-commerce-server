@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { TErrorSources, TGenericErrorResponse } from "../interfaces/error";
+import { TErrorSources, TGenericErrorResponse } from "../interface/error";
 
 const handleDuplicateError = (err: any): TGenericErrorResponse => {
   const regex = /Unique constraint failed on the fields: \(`(.+?)`\)/;

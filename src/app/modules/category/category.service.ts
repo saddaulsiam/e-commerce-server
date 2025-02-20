@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import { TCategory } from "../../interface/category";
 import Category from "../../Schema/Category";
 
@@ -10,7 +10,7 @@ export const createCategoryService = async (categoryData: TCategory) => {
   // Check if category already exists
   const existingCategory = await Category.findOne({ name });
   if (existingCategory) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Category already exists");
+    throw new AppError(httpStatus.BAD_REQUEST, "Category already exists");
   }
 
   // Create new category
@@ -33,7 +33,7 @@ export const getAllCategoriesService = async () => {
 export const getCategoryByIdService = async (categoryId: string) => {
   const category = await Category.findById(categoryId);
   if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Category not found");
   }
   return category;
 };
@@ -42,7 +42,7 @@ export const getCategoryByIdService = async (categoryId: string) => {
 export const updateCategoryService = async (categoryId: string, updateData: Partial<TCategory>) => {
   const category = await Category.findById(categoryId);
   if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Category not found");
   }
 
   // Update the category with provided data
@@ -54,7 +54,7 @@ export const updateCategoryService = async (categoryId: string, updateData: Part
 export const deleteCategoryService = async (categoryId: string) => {
   const category = await Category.findById(categoryId);
   if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Category not found");
   }
 
   // Delete the category

@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import { TBrand } from "../../interface/brand";
 import Brand from "../../Schema/Brand";
 
@@ -8,7 +8,7 @@ export const createBrandService = async (brandData: TBrand) => {
   // Check if brand already exists
   const existingBrand = await Brand.findOne({ name });
   if (existingBrand) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Brand already exists");
+    throw new AppError(httpStatus.BAD_REQUEST, "Brand already exists");
   }
 
   //! Create new brand
@@ -27,7 +27,7 @@ export const getBrandsService = async () => {
 export const getBrandByIdService = async (brandId: string) => {
   const brand = await Brand.findById(brandId);
   if (!brand) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Brand not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Brand not found");
   }
   return brand;
 };
@@ -36,7 +36,7 @@ export const getBrandByIdService = async (brandId: string) => {
 export const updateBrandService = async (brandId: string, updateData: Partial<TBrand>) => {
   const brand = await Brand.findById(brandId);
   if (!brand) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Brand not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Brand not found");
   }
 
   // Update the brand with provided data
@@ -48,7 +48,7 @@ export const updateBrandService = async (brandId: string, updateData: Partial<TB
 export const deleteBrandService = async (brandId: string) => {
   const brand = await Brand.findById(brandId);
   if (!brand) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Brand not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Brand not found");
   }
 
   // Delete the brand

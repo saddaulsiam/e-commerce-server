@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import { generateToken } from "../../../utils/token";
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import { TAdmin } from "../../interface/admin";
 import Admin from "../../Schema/Admin";
 
@@ -12,7 +12,7 @@ export const registerAdminService = async (userData: TAdmin) => {
   // Check if admin already exists
   const existingAdmin = await Admin.findOne({ email });
   if (existingAdmin) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Admin already exists");
+    throw new AppError(httpStatus.BAD_REQUEST, "Admin already exists");
   }
 
   // Hash password
@@ -36,13 +36,13 @@ export const loginAdminService = async (email: string, password: string) => {
   const admin = await Admin.findOne({ email });
 
   if (!admin) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
   }
 
   // Check password
   const isMatch = await bcrypt.compare(password, admin.password);
   if (!isMatch) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
   }
 
   // Generate JWT Token
@@ -61,7 +61,7 @@ export const getAllAdminsService = async () => {
 export const getAdminByIdService = async (adminId: string) => {
   const admin = await Admin.findById(adminId);
   if (!admin) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Admin not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
   }
   return admin;
 };
@@ -71,7 +71,7 @@ export const updateAdminService = async (adminId: string, updateData: Partial<TA
   const updatedAdmin = await Admin.findByIdAndUpdate(adminId, updateData, { new: true });
 
   if (!updatedAdmin) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Admin not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
   }
 
   return updatedAdmin;
@@ -82,7 +82,7 @@ export const deleteAdminService = async (adminId: string) => {
   const deletedAdmin = await Admin.findByIdAndDelete(adminId);
 
   if (!deletedAdmin) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Admin not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
   }
 
   return { message: "Admin deleted successfully" };

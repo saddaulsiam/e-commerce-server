@@ -1,4 +1,4 @@
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import User from "../../Schema/User";
 import Profile from "../../Schema/Profile";
 import httpStatus from "http-status";
@@ -13,7 +13,7 @@ export const getAllUsersService = async () => {
 export const getUserByIdService = async (userId: string) => {
   const user = await User.findById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
   return user;
 };
@@ -22,7 +22,7 @@ export const getUserByIdService = async (userId: string) => {
 export const deleteUserService = async (userId: string) => {
   const user = await User.findById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
   // Delete the user profile if exists
@@ -37,7 +37,7 @@ export const deleteUserService = async (userId: string) => {
 export const getUserProfileService = async (userId: string) => {
   const profile = await Profile.findOne({ userId });
   if (!profile) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User profile not found");
+    throw new AppError(httpStatus.NOT_FOUND, "User profile not found");
   }
   return profile;
 };
@@ -46,7 +46,7 @@ export const getUserProfileService = async (userId: string) => {
 export const updateUserProfileService = async (userId: string, updateData: any) => {
   const profile = await Profile.findOne({ userId });
   if (!profile) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User profile not found");
+    throw new AppError(httpStatus.NOT_FOUND, "User profile not found");
   }
 
   // Update the profile with new data

@@ -1,4 +1,4 @@
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import Vendor from "../../Schema/Vendor";
 import Product from "../../Schema/Product";
 import httpStatus from "http-status";
@@ -9,7 +9,7 @@ export const createVendorService = async (vendorData: TVendor) => {
   // Check if vendor already exists
   const existingVendor = await Vendor.findOne({ userId: vendorData.userId });
   if (existingVendor) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Vendor already exists");
+    throw new AppError(httpStatus.BAD_REQUEST, "Vendor already exists");
   }
 
   // Create new vendor
@@ -28,7 +28,7 @@ export const getAllVendorsService = async () => {
 export const getVendorByIdService = async (vendorId: string) => {
   const vendor = await Vendor.findById(vendorId);
   if (!vendor) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
   return vendor;
 };
@@ -37,7 +37,7 @@ export const getVendorByIdService = async (vendorId: string) => {
 export const updateVendorService = async (vendorId: string, updateData: Partial<TVendor>) => {
   const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, updateData, { new: true });
   if (!updatedVendor) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
   return updatedVendor;
 };
@@ -46,7 +46,7 @@ export const updateVendorService = async (vendorId: string, updateData: Partial<
 export const deleteVendorService = async (vendorId: string) => {
   const deletedVendor = await Vendor.findByIdAndDelete(vendorId);
   if (!deletedVendor) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
   return { message: "Vendor deleted successfully" };
 };

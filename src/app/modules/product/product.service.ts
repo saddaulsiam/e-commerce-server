@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import ApiError from "../../errors/ApiError";
+import AppError from "../../errors/AppError";
 import Product from "../../Schema/Product";
 import { TProduct } from "../../interface/product";
 
@@ -10,7 +10,7 @@ export const createProductService = async (productData: TProduct) => {
   // Check if product already exists
   const existingProduct = await Product.findOne({ name, vendorId });
   if (existingProduct) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Product already exists");
+    throw new AppError(httpStatus.BAD_REQUEST, "Product already exists");
   }
 
   // Create new product
@@ -29,7 +29,7 @@ export const getAllProductsService = async () => {
 export const getProductByIdService = async (productId: string) => {
   const product = await Product.findById(productId);
   if (!product) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Product not found");
   }
   return product;
 };
@@ -38,7 +38,7 @@ export const getProductByIdService = async (productId: string) => {
 export const updateProductService = async (productId: string, updateData: Partial<TProduct>) => {
   const product = await Product.findById(productId);
   if (!product) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Product not found");
   }
 
   // Update product
@@ -50,7 +50,7 @@ export const updateProductService = async (productId: string, updateData: Partia
 export const deleteProductService = async (productId: string) => {
   const product = await Product.findById(productId);
   if (!product) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Product not found");
   }
 
   // Delete the product
@@ -62,7 +62,7 @@ export const deleteProductService = async (productId: string) => {
 export const getProductsByVendorService = async (vendorId: string) => {
   const products = await Product.find({ vendorId });
   if (!products.length) {
-    throw new ApiError(httpStatus.NOT_FOUND, "No products found for this vendor");
+    throw new AppError(httpStatus.NOT_FOUND, "No products found for this vendor");
   }
   return products;
 };
