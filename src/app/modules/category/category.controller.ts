@@ -1,57 +1,66 @@
-const { getAllCategoriesService, createCategoryService, getCategoryByIdService } = require("./category.service");
+import httpStatus from "http-status";
+import catchAsync from "../../../shared/catchAsync";
+import sendResponse from "../../../shared/sendResponse";
+import { CategoriesServices } from "./category.service";
 
-exports.createCategory = async (req, res) => {
-  try {
-    const result = await createCategoryService(req.body);
+const createCategory = catchAsync(async (req, res) => {
+  const result = await CategoriesServices.createCategoryService(req.body);
 
-    res.status(200).json({
-      status: "success",
-      messgae: "Category created successfully!",
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: " Data is not inserted ",
-      error: error.message,
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Category created successfully!",
+    data: result,
+  });
+});
 
-exports.getAllCategories = async (req, res) => {
-  try {
-    const categories = await getAllCategoriesService();
+const getAllCategories = catchAsync(async (req, res) => {
+  const result = await CategoriesServices.getAllCategoriesService();
 
-    res.status(200).json({
-      status: "success",
-      data: categories,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "can't get the categories",
-      error: error.message,
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Categories retrieved successfully!",
+    data: result,
+  });
+});
 
-exports.getCategoryById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const category = await getCategoryByIdService(id);
+const getCategoryById = catchAsync(async (req, res) => {
+  const categoryId = req.params.id;
+  const result = await CategoriesServices.getCategoryByIdService(categoryId);
 
-    res.status(200).json({
-      status: "success",
-      data: category,
-    });
-  } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: "can't get the categories",
-      error: error.message,
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Category retrieved successfully!",
+    data: result,
+  });
+});
+
+const updateCategoryById = catchAsync(async (req, res) => {
+  const categoryId = req.params.id;
+  const updateData = req.body;
+  const result = await CategoriesServices.updateCategoryService(categoryId, updateData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Category updated successfully!",
+    data: result,
+  });
+});
+
+const deleteCategoryById = catchAsync(async (req, res) => {
+  const categoryId = req.params.id;
+  const result = await CategoriesServices.deleteCategoryService(categoryId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Category deleted successfully!",
+    data: result,
+  });
+});
 
 export const CategoriesController = {
   createCategory,

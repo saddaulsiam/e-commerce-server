@@ -1,16 +1,71 @@
-const Category = require("../models/Category");
+import httpStatus from "http-status";
+import ApiError from "../../errors/ApiError";
+import { TCategory } from "../../interface/category";
+import Category from "../../Schema/Category";
 
-exports.createCategoryService = async (data) => {
-  const category = await Category.create(data);
-  return category;
+//! Create a new category
+export const createCategoryService = async (categoryData: TCategory) => {
+  const { name, description, logo } = categoryData;
+
+  // Check if category already exists
+  const existingCategory = await Category.findOne({ name });
+  if (existingCategory) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Category already exists");
+  }
+
+  // Create new category
+  const newCategory = await Category.create({
+    name,
+    description,
+    logo,
+  });
+
+  return newCategory;
 };
 
-exports.getAllCategoriesService = async () => {
-  const categories = await Category.find({});
+//! Get all categories
+export const getAllCategoriesService = async () => {
+  const categories = await Category.find();
   return categories;
 };
 
-exports.getCategoryByIdService = async (id) => {
-  const category = await Category.findOne({ _id: id });
+//! Get category by ID
+export const getCategoryByIdService = async (categoryId: string) => {
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
   return category;
+};
+
+//! Update category by ID
+export const updateCategoryService = async (categoryId: string, updateData: Partial<TCategory>) => {
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
+
+  // Update the category with provided data
+  const updatedCategory = await Category.findByIdAndUpdate(categoryId, updateData, { new: true });
+  return updatedCategory;
+};
+
+//! Delete category by ID
+export const deleteCategoryService = async (categoryId: string) => {
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
+
+  // Delete the category
+  await Category.findByIdAndDelete(categoryId);
+  return { message: "Category deleted successfully" };
+};
+
+export const CategoriesServices = {
+  createCategoryService,
+  getAllCategoriesService,
+  getCategoryByIdService,
+  updateCategoryService,
+  deleteCategoryService,
 };
