@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 
 const register = catchAsync(async (req, res) => {

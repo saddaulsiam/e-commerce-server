@@ -2,7 +2,7 @@ import colors from "colors/safe";
 import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
-import config from "./config";
+import config from "./app/config";
 
 let server: Server;
 

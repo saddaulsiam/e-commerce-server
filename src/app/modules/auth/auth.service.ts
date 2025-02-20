@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
-import { generateToken } from "../../../utils/token";
 import User from "../../Schema/User";
 import AppError from "../../errors/AppError";
 import { TUser } from "../../interface/user";
+import { generateToken } from "../../utils/token";
 
 //! Register a new user
 export const registerService = async (userData: TUser) => {

@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../../utils/catchAsync";
 import { AdminServices } from "./admin.service";
+import sendResponse from "../../utils/sendResponse";
 
 const registerAdmin = catchAsync(async (req, res) => {
   const result = await AdminServices.registerAdminService(req.body);

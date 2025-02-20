@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import { Types } from "mongoose";
-import catchAsync from "../../../shared/catchAsync";
-import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 import { PaymentServices } from "./payment.service";
 
 const createPaymentIntent = catchAsync(async (req, res) => {
@@ -55,7 +55,7 @@ const createSslcommerzPaymentIntent = catchAsync(async (req, res) => {
   };
 
   // create order on database
-  await orderNowService(order);
+  // await orderNowService(order); //! need work hare
 
   const intent = await PaymentServices.createSslcommerzPaymentIntentService(data);
 

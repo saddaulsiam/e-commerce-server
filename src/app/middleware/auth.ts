@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import catchAsync from "../../shared/catchAsync";
+import catchAsync from "../../utils/catchAsync";
 import AppError from "../errors/AppError";
-import config from "../../config";
+import config from "../config";
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
