@@ -1,11 +1,13 @@
 import express from "express";
 import { OrdersController } from "./order.controller";
+import validateRequest from "../../middleware/validateRequest";
+import { OrderValidation } from "./order.validation";
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(OrdersController.createOrder) // Create a new order
+  .post(validateRequest(OrderValidation.createOrder), OrdersController.createOrder)
   .get(OrdersController.getAllOrders); // Get all orders (for Admin)
 
 router.get("/user/:userId", OrdersController.getUserOrders); // Get orders for a specific user

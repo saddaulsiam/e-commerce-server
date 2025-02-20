@@ -1,10 +1,13 @@
 import express from "express";
 import { AdminsController } from "./admin.controller";
+import validateRequest from "../../middleware/validateRequest";
+import { AdminValidation } from "./admin.validation";
 
 const router = express.Router();
 
 // Admin authentication
-router.post("/register", AdminsController.registerAdmin); // Register admin
+router.post("/register", validateRequest(AdminValidation.createAdmin), AdminsController.registerAdmin); // Register admin
+
 router.post("/login", AdminsController.loginAdmin); // Admin login
 
 // Admin management (only accessible by other admins)

@@ -1,7 +1,7 @@
 import { TProfile } from "./user";
 
 export interface TAdmin {
-  name: string;
+  displayName: string;
   phoneNumber: string;
   email: string;
   password: string;

@@ -7,7 +7,7 @@ import Admin from "../../Schema/Admin";
 
 //!  Register a new admin
 export const registerAdminService = async (userData: TAdmin) => {
-  const { name, email, phoneNumber, password, role } = userData;
+  const { displayName, email, phoneNumber, password, role } = userData;
 
   // Check if admin already exists
   const existingAdmin = await Admin.findOne({ email });
@@ -20,7 +20,7 @@ export const registerAdminService = async (userData: TAdmin) => {
 
   // Create new admin
   const newAdmin = await Admin.create({
-    name,
+    displayName,
     email,
     phoneNumber,
     password: hashedPassword,
