@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
-import jwt from "jsonwebtoken";
-import config from "../../../config";
+import { generateToken } from "../../../utils/token";
 import User from "../../Schema/User";
 import ApiError from "../../errors/ApiError";
 import { TUser } from "../../interface/user";
@@ -49,7 +48,7 @@ export const loginService = async (loginData: TUser) => {
   }
 
   // Generate JWT Token
-  const token = jwt.sign({ id: user._id, role: user.role }, config.jwt_access_secret as string, { expiresIn: "7d" });
+  const token = generateToken({ id: user._id, role: user.role, email: user.email });
 
   return { user, token };
 };

@@ -1,16 +1,12 @@
 import jwt from "jsonwebtoken";
+import config from "../config";
 
-exports.generateToken = (userInfo: any) => {
-  const payload = {
-    id: userInfo._id,
-    email: userInfo.email,
-    role: userInfo.role,
-    displayName: userInfo.displayName,
-    emailVerified: userInfo.emailVerified,
-    providerId: userInfo.providerId,
-  };
+export const generateToken = (payload: object) => {
+  const secretKey = config.jwt_access_secret as string;
 
-  return jwt.sign(payload, process.env.JWT_TOKEN_SECRET as string, {
-    expiresIn: "7days",
-  });
+  if (!secretKey) {
+    throw new Error("JWT_SECRET is not defined in environment variables.");
+  }
+
+  return jwt.sign(payload, secretKey, { expiresIn: config.jwt_access_expires_in as string });
 };
