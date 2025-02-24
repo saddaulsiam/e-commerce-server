@@ -1,58 +1,124 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
-import User from "../../Schema/User";
+import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../errors/AppError";
-import { generateToken } from "../../utils/token";
+import User from "../../Schema/User";
 import { TUser } from "../user/user.interface";
+import { jwtHelpers } from "../../utils/jwtHelpers";
+import config from "../../config";
 
 //! Register a new user
-export const registerService = async (userData: TUser) => {
+const registerService = async (userData: TUser) => {
   const { displayName, phoneNumber, email, password, role } = userData;
 
-  // Check if user already exists
-  if (await User.findOne({ email })) {
-    throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
-  }
+  // Hash password only if provided
+  const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // Upsert user: Update if exists, otherwise create
+  const user = await User.findOneAndUpdate(
+    { email },
+    {
+      displayName,
+      phoneNumber: phoneNumber || null,
+      password: hashedPassword || null,
+      role: role || "customer",
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
 
-  // Create new user
-  const newUser = await User.create({
-    displayName,
-    email,
-    phoneNumber,
-    password: hashedPassword,
-    role: role || "customer",
-    isEmailVerified: false,
-  });
+  // Generate JWT Token
+  const accessToken = jwtHelpers.generateToken(
+    {
+      _id: user._id,
+      role: user.role,
+      email: user.email,
+    },
+    config.jwt_access_secret!,
+    config.jwt_access_expires_in!
+  );
 
-  return newUser;
+  const refreshToken = jwtHelpers.generateToken(
+    {
+      id: userData.id,
+      role: userData.role,
+      email: userData.email,
+    },
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string
+  );
+
+  return { user, accessToken, refreshToken };
 };
 
-//! Login a user
-export const loginService = async (loginData: TUser) => {
-  const { email, password } = loginData;
+//! Login
+const loginService = async (email: string) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
 
-  // Check if user exists
-  const user = await User.findOne({ email }).populate("profile");
+  // Generate JWT Token
+  const accessToken = jwtHelpers.generateToken(
+    {
+      _id: user._id,
+      role: user.role,
+      email: user.email,
+    },
+    config.jwt_access_secret!,
+    config.jwt_access_expires_in!
+  );
+
+  const refreshToken = jwtHelpers.generateToken(
+    {
+      id: user.id,
+      role: user.role,
+      email: user.email,
+    },
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string
+  );
+
+  return { user, accessToken, refreshToken };
+};
+
+//! Refresh Token Service
+const refreshTokenService = async (token: string) => {
+  // Verify the refresh token
+  const decodedData = jwtHelpers.verifyToken(token, config.jwt_refresh_secret as string);
+
+  if (!decodedData?.email) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token data!");
+  }
+
+  // Find user in DB
+  const user = await User.findOne({ email: decodedData.email });
+
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, "User not found!");
   }
 
-  // Check password
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
-  }
+  // Generate new access token
+  const accessToken = jwtHelpers.generateToken(
+    {
+      _id: user._id,
+      role: user.role,
+      email: user.email,
+    },
+    config.jwt_access_secret!,
+    config.jwt_access_expires_in!
+  );
 
-  // Generate JWT Token
-  const token = generateToken({ id: user._id, role: user.role, email: user.email });
+  return { accessToken };
+};
 
-  return { user, token };
+//! Get my profile
+const getMeService = async (user: JwtPayload) => {
+  return await User.findById(user._id).populate("profile");
 };
 
 export const AuthServices = {
   registerService,
   loginService,
+  refreshTokenService,
+  getMeService,
 };

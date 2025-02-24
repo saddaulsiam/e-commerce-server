@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
-import { TBrand } from "../modules/brand/brand.interface";
-import { TCategory } from "../modules/category/category.interface";
+import { TBrand } from "../brand/brand.interface";
+import { TCategory } from "../category/category.interface";
 
 export interface TProduct extends Document {
   vendorId: Types.ObjectId;

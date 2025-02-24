@@ -4,11 +4,10 @@ import Profile from "./Profile"; // Import Profile model
 const userSchema = new mongoose.Schema(
   {
     displayName: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
+    phoneNumber: { type: String },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
     role: { type: String, enum: ["customer", "vendor"], required: true },
-    isEmailVerified: { type: Boolean, default: false },
     profile: { type: mongoose.Schema.Types.ObjectId, ref: "Profile" },
   },
   { timestamps: true }

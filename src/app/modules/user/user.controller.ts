@@ -68,7 +68,7 @@ const updateUserProfile = catchAsync(async (req, res) => {
   });
 });
 
-export const UsersController = {
+export const UsersControllers = {
   getAllUsers,
   getUserById,
   deleteUser,

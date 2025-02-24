@@ -2,8 +2,9 @@ import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import Admin from "../../Schema/Admin";
-import { generateToken } from "../../utils/token";
 import { TAdmin } from "./admin.interface";
+import { jwtHelpers } from "../../utils/jwtHelpers";
+import config from "../../config";
 
 //!  Register a new admin
 export const registerAdminService = async (userData: TAdmin) => {
@@ -46,9 +47,17 @@ export const loginAdminService = async (email: string, password: string) => {
   }
 
   // Generate JWT Token
-  const token = generateToken({ id: admin._id, role: admin.role, email: admin.email });
+  const accessToken = jwtHelpers.generateToken(
+    {
+      _id: admin._id,
+      role: admin.role,
+      email: admin.email,
+    },
+    config.jwt_access_secret!,
+    config.jwt_access_expires_in!
+  );
 
-  return { admin, token };
+  return { admin, accessToken };
 };
 
 //!  Get All Admins

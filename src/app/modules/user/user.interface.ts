@@ -7,7 +7,6 @@ export interface TUser extends Document {
   email: string;
   password: string;
   role: "customer" | "vendor";
-  isEmailVerified: boolean;
   profile: TProfile;
   createdAt: Date;
   updatedAt: Date;
