@@ -18,6 +18,7 @@ router.post("/login", AdminsController.loginAdmin); // Admin login
 
 //! Admin management (only accessible by other admins)
 router.get("/", AdminsController.getAllAdmins); // Get all admins
+router.get("/:email", AdminsController.getAdminByEmail); // Get all admins
 
 router
   .route("/:id")

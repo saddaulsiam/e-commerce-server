@@ -49,6 +49,18 @@ const getAdminById = catchAsync(async (req, res) => {
   });
 });
 
+const getAdminByEmail = catchAsync(async (req, res) => {
+  const adminEmail = req.params.email;
+  const result = await AdminServices.getAdminByEmailService(adminEmail);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin retrieved successfully!",
+    data: result,
+  });
+});
+
 const updateAdmin = catchAsync(async (req, res) => {
   const adminId = req.params.id;
   const updateData = req.body;
@@ -79,6 +91,7 @@ export const AdminsController = {
   loginAdmin,
   getAllAdmins,
   getAdminById,
+  getAdminByEmail,
   updateAdmin,
   deleteAdmin,
 };

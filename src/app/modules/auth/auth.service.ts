@@ -52,7 +52,7 @@ const registerService = async (userData: TUser) => {
 
 //! Login
 const loginService = async (email: string) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate("profile");
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }

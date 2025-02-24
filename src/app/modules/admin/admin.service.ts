@@ -75,7 +75,16 @@ export const getAdminByIdService = async (adminId: string) => {
   return admin;
 };
 
-//!  Update Admin
+//! Get Admin by Email
+export const getAdminByEmailService = async (email: string) => {
+  const admin = await Admin.findOne({ email });
+  if (!admin) {
+    throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
+  }
+  return admin;
+};
+
+//! Update Admin
 export const updateAdminService = async (adminId: string, updateData: Partial<TAdmin>) => {
   const updatedAdmin = await Admin.findByIdAndUpdate(adminId, updateData, { new: true });
 
@@ -103,6 +112,7 @@ export const AdminServices = {
   loginAdminService,
   getAllAdminsService,
   getAdminByIdService,
+  getAdminByEmailService,
   updateAdminService,
   deleteAdminService,
 };
