@@ -1,5 +1,7 @@
 import express from "express";
 import { UsersControllers } from "./user.controller";
+import validateRequest from "../../middleware/validateRequest";
+import { UserValidation } from "./user.validation";
 
 const router = express.Router();
 
@@ -14,5 +16,10 @@ router
   .route("/:id/profile")
   .get(UsersControllers.getUserProfile) // Get user profile
   .put(UsersControllers.updateUserProfile); // Update user profile
+
+router
+  .route("/:id/address")
+  .post(validateRequest(UserValidation.newAddress), UsersControllers.AddNewAddress) // Add new address
+  .delete(); // Delete address //! add korte hobe;
 
 export const UsersRoutes = router;

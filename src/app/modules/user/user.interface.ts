@@ -13,10 +13,13 @@ export interface TUser extends Document {
 }
 
 export interface TAddress {
+  name: string;
+  email: string;
+  phoneNumber: string;
   street: string;
   city: string;
   area: string;
-  fullAddress: string;
+  address: string;
 }
 
 export interface TProfile extends Document {

@@ -2,6 +2,7 @@ import AppError from "../../errors/AppError";
 import User from "../../Schema/User";
 import Profile from "../../Schema/Profile";
 import httpStatus from "http-status";
+import { TAddress } from "./user.interface";
 
 //! Get all users
 export const getAllUsersService = async () => {
@@ -54,10 +55,23 @@ export const updateUserProfileService = async (userId: string, updateData: any) 
   return updatedProfile;
 };
 
+//! Add New Address
+export const AddNewAddressService = async (userId: string, addressData: TAddress) => {
+  const profile = await Profile.findOne({ userId });
+  if (!profile) {
+    throw new AppError(httpStatus.NOT_FOUND, "User profile not found");
+  }
+
+  // Update the profile with new data
+  const updatedProfile = await Profile.findOneAndUpdate({ userId }, { $push: { address: addressData } }, { new: true });
+  return updatedProfile;
+};
+
 export const UsersServices = {
   getAllUsersService,
   getUserByIdService,
   deleteUserService,
   getUserProfileService,
   updateUserProfileService,
+  AddNewAddressService,
 };

@@ -68,10 +68,25 @@ const updateUserProfile = catchAsync(async (req, res) => {
   });
 });
 
+// Add New Address
+const AddNewAddress = catchAsync(async (req, res) => {
+  const userId = req.params.id;
+  const updateData = req.body;
+  const result = await UsersServices.AddNewAddressService(userId, updateData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "New Address added successfully!",
+    data: result,
+  });
+});
+
 export const UsersControllers = {
   getAllUsers,
   getUserById,
   deleteUser,
   getUserProfile,
   updateUserProfile,
+  AddNewAddress,
 };

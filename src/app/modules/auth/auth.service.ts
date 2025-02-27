@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import { JwtPayload } from "jsonwebtoken";
+import mongoose from "mongoose";
 import config from "../../config";
 import AppError from "../../errors/AppError";
+import Profile from "../../Schema/Profile";
 import User from "../../Schema/User";
 import { jwtHelpers } from "../../utils/jwtHelpers";
 import { TUser } from "../user/user.interface";
@@ -11,40 +13,67 @@ import { TUser } from "../user/user.interface";
 const registerService = async (userData: TUser) => {
   const { displayName, phoneNumber, email, password, role } = userData;
 
-  // Hash password only if provided
+  // Start a Mongoose transaction
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  // Check if the user already exists
+  let user = await User.findOne({ email }).populate("profile");
+  if (user) {
+    // Ensure the profile exists
+    if (!user.profile) {
+      const profile = await Profile.create([{ userId: user._id, address: [], photo: "", orders: [] }], { session });
+      user.profile = profile[0]._id;
+      await user.save({ session });
+    }
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    // Generate and return tokens for existing user
+    const accessToken = jwtHelpers.generateToken(
+      { id: user._id, role: user.role, email: user.email },
+      config.jwt_access_secret!,
+      config.jwt_access_expires_in!
+    );
+
+    const refreshToken = jwtHelpers.generateToken(
+      { id: user._id, role: user.role, email: user.email },
+      config.jwt_refresh_secret!,
+      config.jwt_refresh_expires_in!
+    );
+
+    return { user, accessToken, refreshToken };
+  }
+
+  // Hash password
   const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 
-  // Upsert user: Update if exists, otherwise create
-  const user = await User.findOneAndUpdate(
-    { email },
-    {
-      displayName,
-      phoneNumber: phoneNumber || null,
-      password: hashedPassword || null,
-      role: role || "customer",
-    },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
-  ).populate("profile");
+  // Create the user inside the transaction
+  user = new User({ displayName, phoneNumber, email, password: hashedPassword, role });
+  await user.save({ session });
 
-  // Generate JWT Token
+  // Create profile for new user
+  const profile = await Profile.create([{ userId: user._id, address: [], photo: "", orders: [] }], { session });
+  user.profile = profile[0]._id;
+  await user.save({ session });
+
+  // Commit the transaction
+  await session.commitTransaction();
+  session.endSession();
+
+  // Generate JWT Tokens
   const accessToken = jwtHelpers.generateToken(
-    {
-      _id: user._id,
-      role: user.role,
-      email: user.email,
-    },
+    { id: user._id, role: user.role, email: user.email },
     config.jwt_access_secret!,
     config.jwt_access_expires_in!
   );
 
   const refreshToken = jwtHelpers.generateToken(
-    {
-      id: userData.id,
-      role: userData.role,
-      email: userData.email,
-    },
-    config.jwt_refresh_secret as string,
-    config.jwt_refresh_expires_in as string
+    { id: user._id, role: user.role, email: user.email },
+    config.jwt_refresh_secret!,
+    config.jwt_refresh_expires_in!
   );
 
   return { user, accessToken, refreshToken };
