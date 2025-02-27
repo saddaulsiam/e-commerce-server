@@ -1,11 +1,11 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import { JwtPayload } from "jsonwebtoken";
+import config from "../../config";
 import AppError from "../../errors/AppError";
 import User from "../../Schema/User";
-import { TUser } from "../user/user.interface";
 import { jwtHelpers } from "../../utils/jwtHelpers";
-import config from "../../config";
+import { TUser } from "../user/user.interface";
 
 //! Register a new user
 const registerService = async (userData: TUser) => {
@@ -24,7 +24,7 @@ const registerService = async (userData: TUser) => {
       role: role || "customer",
     },
     { upsert: true, new: true, setDefaultsOnInsert: true }
-  );
+  ).populate("profile");
 
   // Generate JWT Token
   const accessToken = jwtHelpers.generateToken(
