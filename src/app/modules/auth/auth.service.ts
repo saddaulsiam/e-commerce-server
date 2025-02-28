@@ -33,13 +33,13 @@ const registerService = async (userData: TUser) => {
 
     // Generate and return tokens for existing user
     const accessToken = jwtHelpers.generateToken(
-      { id: user._id, role: user.role, email: user.email },
+      { _id: user._id, role: user.role, email: user.email },
       config.jwt_access_secret!,
       config.jwt_access_expires_in!
     );
 
     const refreshToken = jwtHelpers.generateToken(
-      { id: user._id, role: user.role, email: user.email },
+      { _id: user._id, role: user.role, email: user.email },
       config.jwt_refresh_secret!,
       config.jwt_refresh_expires_in!
     );
@@ -65,13 +65,13 @@ const registerService = async (userData: TUser) => {
 
   // Generate JWT Tokens
   const accessToken = jwtHelpers.generateToken(
-    { id: user._id, role: user.role, email: user.email },
+    { _id: user._id, role: user.role, email: user.email },
     config.jwt_access_secret!,
     config.jwt_access_expires_in!
   );
 
   const refreshToken = jwtHelpers.generateToken(
-    { id: user._id, role: user.role, email: user.email },
+    { _id: user._id, role: user.role, email: user.email },
     config.jwt_refresh_secret!,
     config.jwt_refresh_expires_in!
   );
@@ -99,7 +99,7 @@ const loginService = async (email: string) => {
 
   const refreshToken = jwtHelpers.generateToken(
     {
-      id: user.id,
+      _id: user.id,
       role: user.role,
       email: user.email,
     },

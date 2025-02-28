@@ -1,10 +1,13 @@
 import { z } from "zod";
 
-export const addressSchema = z.object({
-  street: z.string().min(1, "Street is required"),
-  city: z.string().min(1, "City is required"),
-  area: z.string().min(1, "State is required"),
-  fullAddress: z.string().min(1, "Full address is required"),
+export const zodAddressSchema = z.object({
+  name: z.string().nonempty("Name is required"),
+  email: z.string().email("Invalid email address"),
+  phoneNumber: z.string().nonempty("Phone number is required"),
+  street: z.string().nonempty("Street is required"),
+  city: z.string().nonempty("City is required"),
+  area: z.string().nonempty("Area is required"),
+  address: z.string().nonempty("Address is required"),
 });
 
 const createVendor = z.object({
@@ -14,7 +17,7 @@ const createVendor = z.object({
     storeDescription: z.string().min(1, "Store description is required"),
     storeLogo: z.string().url("Invalid store logo URL").optional(),
     storeBanner: z.string().url("Invalid store banner URL").optional(),
-    address: addressSchema,
+    address: zodAddressSchema,
   }),
 });
 

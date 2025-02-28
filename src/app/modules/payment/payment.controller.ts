@@ -1,23 +1,23 @@
 import httpStatus from "http-status";
-import { Types } from "mongoose";
-import catchAsync from "../../../utils/catchAsync";
+import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { PaymentServices } from "./payment.service";
 
+//! Creating a payment intent
 const createPaymentIntent = catchAsync(async (req, res) => {
-  const { price } = req.body;
-  const totalPrice = parseFloat(price.toFixed(2));
+  const totalAmount = parseFloat(req.body.totalAmount.toFixed(2));
 
-  const clientSecret = await PaymentServices.createPaymentIntentService(totalPrice);
+  const clientSecret = await PaymentServices.createPaymentIntentService(totalAmount);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Category deleted successfully!",
-    data: clientSecret,
+    message: "Payment intent created successfully!",
+    data: { clientSecret },
   });
 });
 
+/* 
 const createSslcommerzPaymentIntent = catchAsync(async (req, res) => {
   const tran_id = new Types.ObjectId().toString();
   const order = await req.body;
@@ -84,11 +84,11 @@ const sslPaymentCancel = catchAsync(async (req, res) => {
 
   res.redirect("http://localhost:3000/payment");
 });
-
+ */
 export const PaymentController = {
   createPaymentIntent,
-  createSslcommerzPaymentIntent,
-  sslPaymentSuccess,
-  sslPaymentFail,
-  sslPaymentCancel,
+  // createSslcommerzPaymentIntent,
+  // sslPaymentSuccess,
+  // sslPaymentFail,
+  // sslPaymentCancel,
 };

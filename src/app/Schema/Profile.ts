@@ -11,7 +11,7 @@ const profileSchema = new mongoose.Schema(
         street: { type: String, required: true },
         city: { type: String, required: true },
         area: { type: String, required: true },
-        fullAddress: { type: String, required: true },
+        address: { type: String, required: true },
       },
     ],
     photo: { type: String, default: "" },

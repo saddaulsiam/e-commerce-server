@@ -8,7 +8,7 @@ const createOrder = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
-    message: "Order created successfully!",
+    message: "Order placed successfully!",
     data: result,
   });
 });
