@@ -9,7 +9,14 @@ const router = express.Router();
 router.post(
   "/create-stripe-payment-intent",
   auth("customer"),
-  validateRequest(PaymentValidation.createPaymentIntent),
+  validateRequest(PaymentValidation.createStripPaymentIntent),
+  PaymentController.createPaymentIntent
+);
+
+router.post(
+  "/create-ssl-payment-intent",
+  auth("customer"),
+  validateRequest(PaymentValidation.createSSLPaymentIntent),
   PaymentController.createPaymentIntent
 );
 

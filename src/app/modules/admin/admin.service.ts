@@ -53,8 +53,8 @@ export const loginAdminService = async (email: string, password: string) => {
       role: admin.role,
       email: admin.email,
     },
-    config.jwt_access_secret!,
-    config.jwt_access_expires_in!
+    config.jwt.jwt_access_secret!,
+    config.jwt.jwt_access_expires_in!
   );
 
   return { admin, accessToken };

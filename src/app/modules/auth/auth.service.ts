@@ -34,14 +34,14 @@ const registerService = async (userData: TUser) => {
     // Generate and return tokens for existing user
     const accessToken = jwtHelpers.generateToken(
       { _id: user._id, role: user.role, email: user.email },
-      config.jwt_access_secret!,
-      config.jwt_access_expires_in!
+      config.jwt.jwt_access_secret!,
+      config.jwt.jwt_access_expires_in!
     );
 
     const refreshToken = jwtHelpers.generateToken(
       { _id: user._id, role: user.role, email: user.email },
-      config.jwt_refresh_secret!,
-      config.jwt_refresh_expires_in!
+      config.jwt.jwt_refresh_secret!,
+      config.jwt.jwt_refresh_expires_in!
     );
 
     return { user, accessToken, refreshToken };
@@ -66,14 +66,14 @@ const registerService = async (userData: TUser) => {
   // Generate JWT Tokens
   const accessToken = jwtHelpers.generateToken(
     { _id: user._id, role: user.role, email: user.email },
-    config.jwt_access_secret!,
-    config.jwt_access_expires_in!
+    config.jwt.jwt_access_secret!,
+    config.jwt.jwt_access_expires_in!
   );
 
   const refreshToken = jwtHelpers.generateToken(
     { _id: user._id, role: user.role, email: user.email },
-    config.jwt_refresh_secret!,
-    config.jwt_refresh_expires_in!
+    config.jwt.jwt_refresh_secret!,
+    config.jwt.jwt_refresh_expires_in!
   );
 
   return { user, accessToken, refreshToken };
@@ -93,8 +93,8 @@ const loginService = async (email: string) => {
       role: user.role,
       email: user.email,
     },
-    config.jwt_access_secret!,
-    config.jwt_access_expires_in!
+    config.jwt.jwt_access_secret!,
+    config.jwt.jwt_access_expires_in!
   );
 
   const refreshToken = jwtHelpers.generateToken(
@@ -103,8 +103,8 @@ const loginService = async (email: string) => {
       role: user.role,
       email: user.email,
     },
-    config.jwt_refresh_secret as string,
-    config.jwt_refresh_expires_in as string
+    config.jwt.jwt_refresh_secret as string,
+    config.jwt.jwt_refresh_expires_in as string
   );
 
   return { user, accessToken, refreshToken };
@@ -113,7 +113,7 @@ const loginService = async (email: string) => {
 //! Refresh Token Service
 const refreshTokenService = async (token: string) => {
   // Verify the refresh token
-  const decodedData = jwtHelpers.verifyToken(token, config.jwt_refresh_secret as string);
+  const decodedData = jwtHelpers.verifyToken(token, config.jwt.jwt_refresh_secret as string);
 
   if (!decodedData?.email) {
     throw new AppError(httpStatus.UNAUTHORIZED, "Invalid token data!");
@@ -133,8 +133,8 @@ const refreshTokenService = async (token: string) => {
       role: user.role,
       email: user.email,
     },
-    config.jwt_access_secret!,
-    config.jwt_access_expires_in!
+    config.jwt.jwt_access_secret!,
+    config.jwt.jwt_access_expires_in!
   );
 
   return { accessToken };
