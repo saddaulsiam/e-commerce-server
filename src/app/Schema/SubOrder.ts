@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ORDER_STATUSES, PAYMENT_METHODS, shippingAddressSchema } from "./Order";
+import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUS, shippingAddressSchema } from "./Order";
 
 const SubOrderSchema = new mongoose.Schema(
   {
@@ -46,6 +46,11 @@ const SubOrderSchema = new mongoose.Schema(
     isPaid: {
       type: Boolean,
       default: false,
+    },
+    paymentStatus: {
+      type: String,
+      enum: PAYMENT_STATUS,
+      default: "unpaid",
     },
     shippingAddress: {
       type: shippingAddressSchema,

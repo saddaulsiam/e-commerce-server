@@ -20,7 +20,7 @@ export default {
   strip_secret_key: process.env.STRIP_SECRET_KEY,
 
   sslcommerz: {
-    store_id: process.env.your_store_id,
-    store_pass: process.env.your_store_pass,
+    store_id: process.env.SSLCOMMERZ_STORE_ID,
+    store_pass: process.env.SSLCOMMERZ_STORE_PASS,
   },
 };

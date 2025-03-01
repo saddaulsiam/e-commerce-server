@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { TAddress } from "../user/user.interface";
 
 // Payment Status Enum
 export enum PaymentStatus {
@@ -40,6 +41,7 @@ export interface TOrder extends Document {
   paymentMethod: PaymentMethod;
   isPaid: boolean;
   paymentStatus: PaymentStatus;
+  shippingAddress: TAddress;
   status: OrderStatus;
   subOrders: TSubOrder[];
 }

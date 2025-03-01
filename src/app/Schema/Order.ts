@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 // Enum constants for reusability
 export const PAYMENT_METHODS = ["stripe", "sslCommerz", "cashOnDelivery"] as const;
 export const ORDER_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"] as const;
+export const PAYMENT_STATUS = ["unpaid", "paid", "refunded"] as const;
 
 // Shipping Address Schema (Modular & Reusable)
 export const shippingAddressSchema = new mongoose.Schema({
@@ -46,7 +47,7 @@ export const shippingAddressSchema = new mongoose.Schema({
   },
 });
 
-//  Order Schema
+// Order Schema
 const orderSchema = new mongoose.Schema(
   {
     userId: {
@@ -70,21 +71,29 @@ const orderSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
-    status: {
+    paymentStatus: {
       type: String,
-      enum: ORDER_STATUSES,
-      default: "pending",
+      enum: PAYMENT_STATUS,
+      default: "unpaid",
     },
     shippingAddress: {
       type: shippingAddressSchema,
       required: true,
     },
-    subOrders: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "SubOrder",
-      },
-    ],
+    status: {
+      type: String,
+      enum: ORDER_STATUSES,
+      default: "pending",
+    },
+    subOrders: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "SubOrder",
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );
