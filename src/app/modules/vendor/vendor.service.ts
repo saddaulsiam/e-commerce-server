@@ -51,9 +51,9 @@ export const getAllVendorsService = async () => {
   return vendors;
 };
 
-//! Get vendor by ID
-export const getVendorByIdService = async (vendorId: string) => {
-  const vendor = await Vendor.findById(vendorId);
+//! Get vendor by UserID
+export const getVendorByUserIdService = async (userId: string) => {
+  const vendor = await Vendor.findOne({ userId: userId });
   if (!vendor) {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
@@ -87,7 +87,7 @@ export const getVendorProductsService = async (vendorId: string) => {
 export const VendorsServices = {
   createVendorService,
   getAllVendorsService,
-  getVendorByIdService,
+  getVendorByUserIdService,
   updateVendorService,
   deleteVendorService,
   getVendorProductsService,

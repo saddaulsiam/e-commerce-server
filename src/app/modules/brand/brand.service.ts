@@ -6,7 +6,7 @@ import Brand from "../../Schema/Brand";
 //! Create a new brand
 export const createBrandService = async (brandData: TBrand) => {
   // Check if brand already exists
-  const existingBrand = await Brand.findOne({ name });
+  const existingBrand = await Brand.findOne({ name: brandData.name });
   if (existingBrand) {
     throw new AppError(httpStatus.BAD_REQUEST, "Brand already exists");
   }

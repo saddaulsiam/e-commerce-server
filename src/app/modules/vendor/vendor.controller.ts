@@ -3,7 +3,7 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { VendorsServices } from "./vendor.service";
 
-// Create Vendor
+//! Create Vendor
 const createVendor = catchAsync(async (req, res) => {
   const vendorData = req.body;
   const result = await VendorsServices.createVendorService(vendorData);
@@ -16,7 +16,7 @@ const createVendor = catchAsync(async (req, res) => {
   });
 });
 
-// Get all vendors
+//! Get all vendors
 const getAllVendors = catchAsync(async (req, res) => {
   const result = await VendorsServices.getAllVendorsService();
 
@@ -28,10 +28,10 @@ const getAllVendors = catchAsync(async (req, res) => {
   });
 });
 
-// Get vendor by ID
-const getVendorById = catchAsync(async (req, res) => {
-  const vendorId = req.params.id;
-  const result = await VendorsServices.getVendorByIdService(vendorId);
+//! Get vendor by UserId
+const getVendorByUserId = catchAsync(async (req, res) => {
+  const userId = req.params.id;
+  const result = await VendorsServices.getVendorByUserIdService(userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -41,7 +41,7 @@ const getVendorById = catchAsync(async (req, res) => {
   });
 });
 
-// Update vendor by ID
+//! Update vendor by ID
 const updateVendor = catchAsync(async (req, res) => {
   const vendorId = req.params.id;
   const updateData = req.body;
@@ -55,7 +55,7 @@ const updateVendor = catchAsync(async (req, res) => {
   });
 });
 
-// Delete vendor by ID
+//! Delete vendor by ID
 const deleteVendor = catchAsync(async (req, res) => {
   const vendorId = req.params.id;
   const result = await VendorsServices.deleteVendorService(vendorId);
@@ -68,7 +68,7 @@ const deleteVendor = catchAsync(async (req, res) => {
   });
 });
 
-// Get products by vendor
+//! Get products by vendor
 const getVendorProducts = catchAsync(async (req, res) => {
   const vendorId = req.params.id;
   const result = await VendorsServices.getVendorProductsService(vendorId);
@@ -84,7 +84,7 @@ const getVendorProducts = catchAsync(async (req, res) => {
 export const VendorsController = {
   createVendor,
   getAllVendors,
-  getVendorById,
+  getVendorByUserId,
   updateVendor,
   deleteVendor,
   getVendorProducts,

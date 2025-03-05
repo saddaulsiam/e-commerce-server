@@ -12,8 +12,8 @@ router
 
 router
   .route("/:id")
-  .put(VendorsController.getVendorById) // Get vendor by ID
-  .get(VendorsController.updateVendor) // Update a vendor
+  .get(VendorsController.getVendorByUserId) // Get vendor by ID
+  .put(VendorsController.updateVendor) // Update a vendor
   .delete(VendorsController.deleteVendor); // Delete a vendor
 
 router.get("/vendor/:vendorId", VendorsController.getVendorProducts); // Get products by vendor
