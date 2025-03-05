@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-export const zodAddressSchema = z.object({
-  name: z.string().nonempty("Name is required"),
-  email: z.string().email("Invalid email address"),
-  phoneNumber: z.string().nonempty("Phone number is required"),
+const zodAddressSchema = z.object({
   street: z.string().nonempty("Street is required"),
   city: z.string().nonempty("City is required"),
   area: z.string().nonempty("Area is required"),

@@ -1,36 +1,52 @@
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
-import { TCategory } from "./category.interface";
 import Category from "../../Schema/Category";
+import { TCategory } from "./category.interface";
 
-//! Create a new category
-export const createCategoryService = async (categoryData: TCategory) => {
-  const { name, description, logo } = categoryData;
-
+//! Create or update a category
+const createCategoryService = async (categoryData: TCategory) => {
   // Check if category already exists
-  const existingCategory = await Category.findOne({ name });
+  let existingCategory = await Category.findOne({ name: categoryData.name });
+
   if (existingCategory) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Category already exists");
+    categoryData.subcategories?.forEach((newSubcategory) => {
+      // Find if subcategory exists in Mongoose subdocument array
+      const existingSubcategory = existingCategory.subcategories.find(
+        (sub) => sub.name.toString() === newSubcategory.name
+      );
+
+      if (!existingSubcategory) {
+        // Add new subcategory if not found
+        existingCategory.subcategories.push(newSubcategory);
+      } else {
+        // Merge nested subcategories
+        newSubcategory.subcategories?.forEach((nestedSub) => {
+          const nestedExists = existingSubcategory.subcategories.some((n) => n.name.toString() === nestedSub.name);
+
+          if (!nestedExists) {
+            existingSubcategory.subcategories.push(nestedSub);
+          }
+        });
+      }
+    });
+
+    // Save updated category
+    await existingCategory.save();
+    return existingCategory;
   }
 
-  // Create new category
-  const newCategory = await Category.create({
-    name,
-    description,
-    logo,
-  });
-
+  // Create new category if it doesn't exist
+  const newCategory = await Category.create(categoryData);
   return newCategory;
 };
 
 //! Get all categories
-export const getAllCategoriesService = async () => {
-  const categories = await Category.find();
-  return categories;
+const getAllCategoriesService = async () => {
+  return await Category.find();
 };
 
 //! Get category by ID
-export const getCategoryByIdService = async (categoryId: string) => {
+const getCategoryByIdService = async (categoryId: string) => {
   const category = await Category.findById(categoryId);
   if (!category) {
     throw new AppError(httpStatus.NOT_FOUND, "Category not found");
@@ -39,7 +55,7 @@ export const getCategoryByIdService = async (categoryId: string) => {
 };
 
 //! Update category by ID
-export const updateCategoryService = async (categoryId: string, updateData: Partial<TCategory>) => {
+const updateCategoryService = async (categoryId: string, updateData: Partial<TCategory>) => {
   const category = await Category.findById(categoryId);
   if (!category) {
     throw new AppError(httpStatus.NOT_FOUND, "Category not found");
@@ -51,7 +67,7 @@ export const updateCategoryService = async (categoryId: string, updateData: Part
 };
 
 //! Delete category by ID
-export const deleteCategoryService = async (categoryId: string) => {
+const deleteCategoryService = async (categoryId: string) => {
   const category = await Category.findById(categoryId);
   if (!category) {
     throw new AppError(httpStatus.NOT_FOUND, "Category not found");

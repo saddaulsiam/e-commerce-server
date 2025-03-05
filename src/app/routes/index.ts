@@ -17,16 +17,16 @@ const moduleRoutes = [
     route: AuthRoutes,
   },
   {
-    path: "/users",
-    route: UsersRoutes,
-  },
-  {
     path: "/admin",
     route: AdminsRoutes,
   },
   {
-    path: "/vendors",
+    path: "/vendor",
     route: VendorsRoutes,
+  },
+  {
+    path: "/users",
+    route: UsersRoutes,
   },
   {
     path: "/brands",

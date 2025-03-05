@@ -1,5 +1,10 @@
+export type TSubcategory = {
+  name: string;
+  href: string;
+  subcategories?: TSubcategory[];
+};
+
 export type TCategory = {
   name: string;
-  description: string;
-  logo: string;
+  subcategories?: TSubcategory[];
 };

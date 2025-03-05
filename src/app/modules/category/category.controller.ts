@@ -3,6 +3,7 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { CategoriesServices } from "./category.service";
 
+//! Create or update a category
 const createCategory = catchAsync(async (req, res) => {
   const result = await CategoriesServices.createCategoryService(req.body);
 
@@ -14,6 +15,7 @@ const createCategory = catchAsync(async (req, res) => {
   });
 });
 
+//! Get all categories
 const getAllCategories = catchAsync(async (req, res) => {
   const result = await CategoriesServices.getAllCategoriesService();
 
@@ -25,6 +27,7 @@ const getAllCategories = catchAsync(async (req, res) => {
   });
 });
 
+//! Get category by ID
 const getCategoryById = catchAsync(async (req, res) => {
   const categoryId = req.params.id;
   const result = await CategoriesServices.getCategoryByIdService(categoryId);
@@ -37,6 +40,7 @@ const getCategoryById = catchAsync(async (req, res) => {
   });
 });
 
+//! Update category by ID
 const updateCategoryById = catchAsync(async (req, res) => {
   const categoryId = req.params.id;
   const updateData = req.body;
@@ -50,6 +54,7 @@ const updateCategoryById = catchAsync(async (req, res) => {
   });
 });
 
+//! Delete category by ID
 const deleteCategoryById = catchAsync(async (req, res) => {
   const categoryId = req.params.id;
   const result = await CategoriesServices.deleteCategoryService(categoryId);

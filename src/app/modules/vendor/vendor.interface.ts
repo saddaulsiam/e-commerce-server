@@ -1,5 +1,5 @@
 import { Document, Types } from "mongoose";
-import { TProduct } from "./product";
+import { TProduct } from "../product/product.interface";
 import { TAddress } from "../user/user.interface";
 
 export interface TVendor extends Document {

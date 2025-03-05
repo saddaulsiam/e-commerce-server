@@ -1,10 +1,26 @@
 import mongoose from "mongoose";
 
+const nestedSubcategorySchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    href: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const subcategorySchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    href: { type: String, required: false },
+    subcategories: [nestedSubcategorySchema],
+  },
+  { _id: false }
+);
+
 const categorySchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
-    description: { type: String },
-    image: { type: String },
+    subcategories: [subcategorySchema],
   },
   { timestamps: true }
 );

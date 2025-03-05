@@ -1,21 +1,48 @@
-import AppError from "../../errors/AppError";
-import Vendor from "../../Schema/Vendor";
-import Product from "../../Schema/Product";
 import httpStatus from "http-status";
+import mongoose from "mongoose";
+import AppError from "../../errors/AppError";
+import Product from "../../Schema/Product";
+import User from "../../Schema/User";
+import Vendor from "../../Schema/Vendor";
+import { USER_ROLE } from "../user/user.constant";
 import { TVendor } from "./vendor.interface";
 
-//! Create Vendor
+//! Create Vendor with Transaction
 export const createVendorService = async (vendorData: TVendor) => {
-  // Check if vendor already exists
-  const existingVendor = await Vendor.findOne({ userId: vendorData.userId });
-  if (existingVendor) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Vendor already exists");
+  // Start a Mongoose session and transaction
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Check if StoreName is exists
+    const existVendorByStoreName = await Vendor.findOne({ storeName: vendorData.storeName }).session(session);
+    if (existVendorByStoreName) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Store Name exists");
+    }
+
+    // Check if vendor already exists using the session
+    const existingVendor = await Vendor.findOne({ userId: vendorData.userId }).session(session);
+    if (existingVendor) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Vendor already exists");
+    }
+
+    // Create new vendor using the session
+    const newVendor = await Vendor.create([vendorData], { session });
+
+    // Update user's role using the session
+    await User.findByIdAndUpdate(vendorData.userId, { $set: { role: USER_ROLE.vendor } }, { new: true, session });
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    return newVendor[0];
+  } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
+
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error);
   }
-
-  // Create new vendor
-  const newVendor = await Vendor.create(vendorData);
-
-  return newVendor;
 };
 
 //! Get all vendors
