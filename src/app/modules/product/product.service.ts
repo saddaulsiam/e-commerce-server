@@ -1,6 +1,8 @@
 import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import Product from "../../Schema/Product";
+import { calculatePagination } from "../../utils/paginationHelper";
+import { productFilterableFields } from "./product.constant";
 import { TProduct } from "./product.interface";
 
 //! Create a new product
@@ -20,9 +22,44 @@ export const createProductService = async (productData: TProduct) => {
 };
 
 //! Get all products
-export const getAllProductsService = async () => {
-  const products = await Product.find();
-  return products;
+const getAllProductsService = async (params: any, options: any) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { date, searchTerm, ...filterData } = params;
+
+  const query: any = {};
+
+  if (searchTerm) {
+    query.$or = productFilterableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    }));
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    Object.keys(filterData).forEach((key) => {
+      query[key] = filterData[key];
+    });
+  }
+
+  const sortOptions: { [key: string]: 1 | -1 } = {};
+
+  if (options.sortBy && options.sortOrder) {
+    sortOptions[options.sortBy as string] = options.sortOrder === "asc" ? 1 : -1;
+  } else {
+    sortOptions.createdAt = -1;
+  }
+
+  const result = await Product.find(query).populate("supplier").sort(sortOptions).skip(skip).limit(limit);
+
+  const total = await Product.countDocuments(query);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 //! Get product by ID

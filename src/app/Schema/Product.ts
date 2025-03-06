@@ -11,6 +11,7 @@ const productSchema = new mongoose.Schema(
     brand: { type: String, required: true },
     images: [{ type: String, required: true }],
     colors: [{ type: String, required: true }],
+    discount: { type: Number, required: true },
   },
   { timestamps: true }
 );

@@ -1,6 +1,8 @@
 import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
+import pick from "../../utils/pick";
 import sendResponse from "../../utils/sendResponse";
+import { orderFilterableFields } from "./order.constant";
 import { OrderServices } from "./order.service";
 
 const createOrder = catchAsync(async (req, res) => {
@@ -14,7 +16,10 @@ const createOrder = catchAsync(async (req, res) => {
 });
 
 const getAllOrders = catchAsync(async (req, res) => {
-  const result = await OrderServices.getAllOrdersService();
+  const filters = pick(req.query, orderFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await OrderServices.getAllOrdersService(filters, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -57,22 +62,10 @@ const updateOrderStatus = catchAsync(async (req, res) => {
   });
 });
 
-// const makePayment = catchAsync(async (req, res) => {
-//   const { orderId, paymentDetails } = req.body;
-//   const result = await OrderServices.makePaymentService(orderId, paymentDetails);
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: "Payment processed successfully!",
-//     data: result,
-//   });
-// });
-
 export const OrdersController = {
   createOrder,
   getAllOrders,
   getUserOrders,
   getOrderById,
   updateOrderStatus,
-  // makePayment,
 };

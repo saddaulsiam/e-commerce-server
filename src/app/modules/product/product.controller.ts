@@ -1,9 +1,11 @@
 import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
+import pick from "../../utils/pick";
 import sendResponse from "../../utils/sendResponse";
+import { productFilterableFields } from "./product.constant";
 import { ProductsServices } from "./product.service";
 
-// Create a new product
+//! Create a new product
 const createProduct = catchAsync(async (req, res) => {
   const result = await ProductsServices.createProductService(req.body);
 
@@ -15,9 +17,12 @@ const createProduct = catchAsync(async (req, res) => {
   });
 });
 
-// Get all products
+//! Get all products
 const getAllProducts = catchAsync(async (req, res) => {
-  const result = await ProductsServices.getAllProductsService();
+  const filters = pick(req.query, productFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await ProductsServices.getAllProductsService(filters, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -27,7 +32,7 @@ const getAllProducts = catchAsync(async (req, res) => {
   });
 });
 
-// Get product by ID
+//! Get product by ID
 const getProductById = catchAsync(async (req, res) => {
   const productId = req.params.id;
   const result = await ProductsServices.getProductByIdService(productId);
@@ -40,7 +45,7 @@ const getProductById = catchAsync(async (req, res) => {
   });
 });
 
-// Update product
+//! Update product
 const updateProduct = catchAsync(async (req, res) => {
   const productId = req.params.id;
   const updateData = req.body;
@@ -54,7 +59,7 @@ const updateProduct = catchAsync(async (req, res) => {
   });
 });
 
-// Delete product
+//! Delete product
 const deleteProduct = catchAsync(async (req, res) => {
   const productId = req.params.id;
   const result = await ProductsServices.deleteProductService(productId);
@@ -67,7 +72,7 @@ const deleteProduct = catchAsync(async (req, res) => {
   });
 });
 
-// Get products by vendor ID
+//! Get products by vendor ID
 const getProductsByVendor = catchAsync(async (req, res) => {
   const vendorId = req.params.vendorId;
   const result = await ProductsServices.getProductsByVendorService(vendorId);

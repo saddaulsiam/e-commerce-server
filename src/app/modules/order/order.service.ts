@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import Order from "../../Schema/Order";
 import SubOrder from "../../Schema/SubOrder";
 import AppError from "../../errors/AppError";
+import { calculatePagination } from "../../utils/paginationHelper";
+import { orderFilterableFields } from "./order.constant";
 import { TOrder } from "./order.interface";
 
 //! Create Order Service
@@ -63,12 +65,49 @@ const createOrderService = async (orderData: TOrder) => {
   }
 };
 
-export const getAllOrdersService = async () => {
-  const orders = await Order.find().populate("subOrders");
-  return orders;
+//! Get All Orders
+const getAllOrdersService = async (params: any, options: any) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { date, searchTerm, ...filterData } = params;
+
+  const query: any = {};
+
+  if (searchTerm) {
+    query.$or = orderFilterableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    }));
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    Object.keys(filterData).forEach((key) => {
+      query[key] = filterData[key];
+    });
+  }
+
+  const sortOptions: { [key: string]: 1 | -1 } = {};
+
+  if (options.sortBy && options.sortOrder) {
+    sortOptions[options.sortBy as string] = options.sortOrder === "asc" ? 1 : -1;
+  } else {
+    sortOptions.createdAt = -1;
+  }
+
+  const result = await Order.find(query).sort(sortOptions).skip(skip).limit(limit);
+
+  const total = await Order.countDocuments(query);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
-export const getUserOrdersService = async (userId: string) => {
+//! Get User Orders Service
+const getUserOrdersService = async (userId: string) => {
   const orders = await Order.find({ userId }).populate("subOrders");
   if (!orders) {
     throw new AppError(httpStatus.NOT_FOUND, "No orders found for this user");
@@ -76,7 +115,8 @@ export const getUserOrdersService = async (userId: string) => {
   return orders;
 };
 
-export const getOrderByIdService = async (orderId: string) => {
+//! Get Order By Id Service
+const getOrderByIdService = async (orderId: string) => {
   const order = await Order.findById(orderId).populate("subOrders");
   if (!order) {
     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
@@ -84,7 +124,8 @@ export const getOrderByIdService = async (orderId: string) => {
   return order;
 };
 
-export const updateOrderStatusService = async (orderId: string, status: string) => {
+//! Update Order Status Service
+const updateOrderStatusService = async (orderId: string, status: string) => {
   const updatedOrder = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
 
   if (!updatedOrder) {
