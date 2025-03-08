@@ -106,6 +106,52 @@ const getAllOrdersService = async (params: any, options: any) => {
   };
 };
 
+//! Get All Orders
+const getVendorOrdersService = async (params: any, options: any) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { date, searchTerm, ...filterData } = params;
+
+  const query: any = {};
+
+  if (searchTerm) {
+    query.$or = orderFilterableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    }));
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    Object.keys(filterData).forEach((key) => {
+      query[key] = filterData[key];
+    });
+  }
+
+  const sortOptions: { [key: string]: 1 | -1 } = {};
+
+  if (options.sortBy && options.sortOrder) {
+    sortOptions[options.sortBy as string] = options.sortOrder === "asc" ? 1 : -1;
+  } else {
+    sortOptions.createdAt = -1;
+  }
+
+  const result = await SubOrder.find(query)
+    .populate("orderId")
+    .populate("item.productId")
+    .sort(sortOptions)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await SubOrder.countDocuments(query);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 //! Get User Orders Service
 const getUserOrdersService = async (userId: string) => {
   const orders = await Order.find({ userId }).populate("subOrders");
@@ -137,6 +183,7 @@ const updateOrderStatusService = async (orderId: string, status: string) => {
 export const OrderServices = {
   createOrderService,
   getAllOrdersService,
+  getVendorOrdersService,
   getUserOrdersService,
   getOrderByIdService,
   updateOrderStatusService,

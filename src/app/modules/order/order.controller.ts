@@ -28,9 +28,22 @@ const getAllOrders = catchAsync(async (req, res) => {
   });
 });
 
+const getVendorOrders = catchAsync(async (req, res) => {
+  const filters = pick(req.query, orderFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await OrderServices.getVendorOrdersService(filters, options);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Fetched vendor orders successfully!",
+    data: result,
+  });
+});
+
 const getUserOrders = catchAsync(async (req, res) => {
-  const { userId } = req.params;
-  const result = await OrderServices.getUserOrdersService(userId);
+  const id = req.params.id;
+  const result = await OrderServices.getUserOrdersService(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -65,6 +78,7 @@ const updateOrderStatus = catchAsync(async (req, res) => {
 export const OrdersController = {
   createOrder,
   getAllOrders,
+  getVendorOrders,
   getUserOrders,
   getOrderById,
   updateOrderStatus,
