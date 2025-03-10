@@ -6,6 +6,7 @@ import User from "../../Schema/User";
 import Vendor from "../../Schema/Vendor";
 import { USER_ROLE } from "../user/user.constant";
 import { TVendor } from "./vendor.interface";
+import { calculatePagination } from "../../utils/paginationHelper";
 
 //! Create Vendor with Transaction
 export const createVendorService = async (vendorData: TVendor) => {
@@ -79,18 +80,56 @@ export const deleteVendorService = async (vendorId: string) => {
 };
 
 //! Get customers by vendor
-export const getVendorCustomersService = async (vendorId: string) => {
+export const getVendorCustomersService = async (params: any, options: any) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { searchTerm, ...filterData } = params;
+
   // Step 1: Find orders by vendorId and select only userId
-  const orders = await SubOrder.find({ vendorId }).select("userId");
+  const orders = await SubOrder.find({ vendorId: filterData.vendorId }).select("userId");
 
   // Step 2: Extract unique userIds
   const uniqueUserIds = [...new Set(orders.map((order) => order.userId.toString()))];
 
-  // Step 3: Populate user details
-  const users = await User.find({ _id: { $in: uniqueUserIds } }).populate("profile");
+  // If no users, return empty data
+  if (uniqueUserIds.length === 0) {
+    return {
+      meta: { page, limit, total: 0 },
+      data: [],
+    };
+  }
 
-  // Return users in a single array
-  return users;
+  // Step 3: Build search query
+  const query: any = { _id: { $in: uniqueUserIds } };
+
+  if (searchTerm) {
+    query.$or = [
+      { name: { $regex: searchTerm, $options: "i" } },
+      { email: { $regex: searchTerm, $options: "i" } },
+      { phoneNumber: { $regex: searchTerm, $options: "i" } },
+    ];
+  }
+
+  // Step 4: Sorting
+  const sortOptions: { [key: string]: 1 | -1 } = {};
+  if (options.sortBy && options.sortOrder) {
+    sortOptions[options.sortBy as string] = options.sortOrder === "asc" ? 1 : -1;
+  } else {
+    sortOptions.createdAt = -1;
+  }
+
+  // Step 5: Fetch user data with pagination
+  const users = await User.find(query).populate("profile").sort(sortOptions).skip(skip).limit(limit);
+
+  const total = await User.countDocuments(query);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: users,
+  };
 };
 
 export const VendorsServices = {

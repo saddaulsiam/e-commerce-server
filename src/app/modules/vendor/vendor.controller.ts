@@ -2,6 +2,8 @@ import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { VendorsServices } from "./vendor.service";
+import pick from "../../utils/pick";
+import { vendorFilterableFields } from "./vendor.constant";
 
 //! Create Vendor
 const createVendor = catchAsync(async (req, res) => {
@@ -68,10 +70,14 @@ const deleteVendor = catchAsync(async (req, res) => {
   });
 });
 
-//! Get customers by vendor
+//! Get all customers by vendor
 const getVendorCustomers = catchAsync(async (req, res) => {
   const vendorId = req.params.id;
-  const result = await VendorsServices.getVendorCustomersService(vendorId);
+
+  const filters = pick(req.query, vendorFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await VendorsServices.getVendorCustomersService({ vendorId, ...filters }, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
