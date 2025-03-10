@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
-import Product from "../../Schema/Product";
+import SubOrder from "../../Schema/SubOrder";
 import User from "../../Schema/User";
 import Vendor from "../../Schema/Vendor";
 import { USER_ROLE } from "../user/user.constant";
@@ -78,10 +78,19 @@ export const deleteVendorService = async (vendorId: string) => {
   return { message: "Vendor deleted successfully" };
 };
 
-//! Get products by vendor
-export const getVendorProductsService = async (vendorId: string) => {
-  const products = await Product.find({ vendorId });
-  return products;
+//! Get customers by vendor
+export const getVendorCustomersService = async (vendorId: string) => {
+  // Step 1: Find orders by vendorId and select only userId
+  const orders = await SubOrder.find({ vendorId }).select("userId");
+
+  // Step 2: Extract unique userIds
+  const uniqueUserIds = [...new Set(orders.map((order) => order.userId.toString()))];
+
+  // Step 3: Populate user details
+  const users = await User.find({ _id: { $in: uniqueUserIds } }).populate("profile");
+
+  // Return users in a single array
+  return users;
 };
 
 export const VendorsServices = {
@@ -90,5 +99,5 @@ export const VendorsServices = {
   getVendorByUserIdService,
   updateVendorService,
   deleteVendorService,
-  getVendorProductsService,
+  getVendorCustomersService,
 };

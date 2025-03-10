@@ -68,15 +68,15 @@ const deleteVendor = catchAsync(async (req, res) => {
   });
 });
 
-//! Get products by vendor
-const getVendorProducts = catchAsync(async (req, res) => {
+//! Get customers by vendor
+const getVendorCustomers = catchAsync(async (req, res) => {
   const vendorId = req.params.id;
-  const result = await VendorsServices.getVendorProductsService(vendorId);
+  const result = await VendorsServices.getVendorCustomersService(vendorId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Vendor products retrieved successfully!",
+    message: "Vendor customers retrieved successfully!",
     data: result,
   });
 });
@@ -87,5 +87,5 @@ export const VendorsController = {
   getVendorByUserId,
   updateVendor,
   deleteVendor,
-  getVendorProducts,
+  getVendorCustomers,
 };

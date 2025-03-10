@@ -2,6 +2,7 @@ import express from "express";
 import { VendorsController } from "./vendor.controller";
 import validateRequest from "../../middleware/validateRequest";
 import { VendorValidation } from "./vendor.validation";
+import auth from "../../middleware/auth";
 
 const router = express.Router();
 
@@ -16,6 +17,6 @@ router
   .put(VendorsController.updateVendor) // Update a vendor
   .delete(VendorsController.deleteVendor); // Delete a vendor
 
-router.get("/vendor/:vendorId", VendorsController.getVendorProducts); // Get products by vendor
+router.get("/:id/customers", auth("vendor"), VendorsController.getVendorCustomers); // Get customers by vendor
 
 export const VendorsRoutes = router;

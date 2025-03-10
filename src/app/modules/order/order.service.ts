@@ -30,6 +30,7 @@ const createOrderService = async (orderData: TOrder) => {
     const subOrdersToInsert = subOrders.map((subOrderData) => ({
       orderId: order._id,
       vendorId: subOrderData.vendorId,
+      userId: order.userId,
       item: {
         name: subOrderData.name,
         productId: subOrderData.productId,
