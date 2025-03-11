@@ -1,70 +1,79 @@
 import moment from "moment";
 import { Types } from "mongoose";
 
-export const generateSalesData = (orders: any) => {
-  // Aggregate monthly sales
-  const monthlySales = [
-    { month: "Jan", sales: 0, orders: 0 },
-    { month: "Feb", sales: 0, orders: 0 },
-    { month: "Mar", sales: 0, orders: 0 },
-    { month: "Apr", sales: 0, orders: 0 },
-    { month: "May", sales: 0, orders: 0 },
-    { month: "Jun", sales: 0, orders: 0 },
-  ];
+interface Order {
+  userId: Types.ObjectId | string;
+  totalAmount: number;
+  createdAt: Date;
+}
 
-  // Aggregate weekly sales
-  const weeklySales = [
-    { day: "Mon", sales: 0, orders: 0 },
-    { day: "Tue", sales: 0, orders: 0 },
-    { day: "Wed", sales: 0, orders: 0 },
-    { day: "Thu", sales: 0, orders: 0 },
-    { day: "Fri", sales: 0, orders: 0 },
-    { day: "Sat", sales: 0, orders: 0 },
-    { day: "Sun", sales: 0, orders: 0 },
-  ];
+interface SalesData {
+  month: string;
+  sales: number;
+  orders: number;
+}
 
-  // Aggregate daily sales (by time)
-  const dailySales = [
-    { hour: "12 AM", sales: 0, orders: 0 },
-    { hour: "4 AM", sales: 0, orders: 0 },
-    { hour: "8 AM", sales: 0, orders: 0 },
-    { hour: "12 PM", sales: 0, orders: 0 },
-    { hour: "4 PM", sales: 0, orders: 0 },
-    { hour: "8 PM", sales: 0, orders: 0 },
-  ];
+interface WeeklySalesData {
+  day: string;
+  sales: number;
+  orders: number;
+}
 
-  // Track unique customers per month for growth calculation using `userId`
-  const uniqueCustomersPerMonth: { [key: string]: Set<string> } = {
-    Jan: new Set(),
-    Feb: new Set(),
-    Mar: new Set(),
-    Apr: new Set(),
-    May: new Set(),
-    Jun: new Set(),
-    Jul: new Set(),
-    Aug: new Set(),
-    Sep: new Set(),
-    Oct: new Set(),
-    Nov: new Set(),
-    Dec: new Set(),
-  };
+interface DailySalesData {
+  hour: string;
+  sales: number;
+  orders: number;
+}
 
-  orders.forEach((order: any) => {
+interface MonthlyDaysSalesData {
+  day: number;
+  sales: number;
+  orders: number;
+}
+
+interface UniqueCustomerGrowth {
+  month: string;
+  customers: number;
+}
+
+export const generateSalesData = (orders: Order[]) => {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const timeSlots = ["12 AM", "4 AM", "8 AM", "12 PM", "4 PM", "8 PM"];
+
+  // Initialize data structures
+  const monthlySales: SalesData[] = months.map((month) => ({ month, sales: 0, orders: 0 }));
+  const weeklySales: WeeklySalesData[] = daysOfWeek.map((day) => ({ day, sales: 0, orders: 0 }));
+  const dailySales: DailySalesData[] = timeSlots.map((hour) => ({ hour, sales: 0, orders: 0 }));
+
+  // Unique customers per month
+  const uniqueCustomersPerMonth: { [key: string]: Set<string> } = Object.fromEntries(
+    months.map((month) => [month, new Set<string>()])
+  );
+
+  // Get current month for monthly days sales
+  const currentMonth = moment().format("MMM");
+  const monthlyDaysSales: MonthlyDaysSalesData[] = Array.from({ length: 30 }, (_, i) => ({
+    day: i + 1,
+    sales: 0,
+    orders: 0,
+  }));
+
+  orders.forEach((order) => {
     const orderDate = moment(order.createdAt);
     const month = orderDate.format("MMM");
-    const dayIndex = orderDate.isoWeekday() - 1;
+    const dayIndex = orderDate.isoWeekday() - 1; // Monday = 0, Sunday = 6
     const hour = orderDate.hour();
+    const dayOfMonth = orderDate.date(); // Get the day of the month (1-31)
 
     // Convert userId (Mongoose ObjectId) to string
-    const normalizedUserId = order.userId instanceof Types.ObjectId ? order.userId.toString() : order.userId;
+    const normalizedUserId = order.userId instanceof Types.ObjectId ? order.userId.toString() : String(order.userId);
 
     // Monthly sales and unique customers
-    const monthIndex = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].indexOf(month);
-    if (monthIndex !== -1 && normalizedUserId) {
+    const monthIndex = months.indexOf(month);
+    if (monthIndex !== -1) {
       monthlySales[monthIndex].sales += order.totalAmount;
       monthlySales[monthIndex].orders += 1;
-
-      // Add the normalized userId to the Set for that month (only once per user)
       uniqueCustomersPerMonth[month].add(normalizedUserId);
     }
 
@@ -72,7 +81,7 @@ export const generateSalesData = (orders: any) => {
     weeklySales[dayIndex].sales += order.totalAmount;
     weeklySales[dayIndex].orders += 1;
 
-    // Daily sales (by time)
+    // Daily sales by time slots
     if (hour < 4) dailySales[0].sales += order.totalAmount;
     else if (hour < 8) dailySales[1].sales += order.totalAmount;
     else if (hour < 12) dailySales[2].sales += order.totalAmount;
@@ -80,7 +89,7 @@ export const generateSalesData = (orders: any) => {
     else if (hour < 20) dailySales[4].sales += order.totalAmount;
     else dailySales[5].sales += order.totalAmount;
 
-    // Track orders in daily slots
+    // Track orders in time slots
     dailySales.forEach((slot, index) => {
       if (
         (index === 0 && hour < 4) ||
@@ -93,10 +102,16 @@ export const generateSalesData = (orders: any) => {
         slot.orders += 1;
       }
     });
+
+    // Track daily sales for the current month (limit to 30 days)
+    if (month === currentMonth && dayOfMonth <= 30) {
+      monthlyDaysSales[dayOfMonth - 1].sales += order.totalAmount;
+      monthlyDaysSales[dayOfMonth - 1].orders += 1;
+    }
   });
 
-  // Calculate unique customer growth for each month
-  const uniqueCustomerGrowth = Object.keys(uniqueCustomersPerMonth).map((month) => ({
+  // Calculate unique customer growth
+  const uniqueCustomerGrowth: UniqueCustomerGrowth[] = months.map((month) => ({
     month,
     customers: uniqueCustomersPerMonth[month].size,
   }));
@@ -106,5 +121,7 @@ export const generateSalesData = (orders: any) => {
     weekly: weeklySales,
     daily: dailySales,
     uniqueCustomerGrowth,
+    currentMonth,
+    monthlyDaysSales,
   };
 };

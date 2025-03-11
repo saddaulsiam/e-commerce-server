@@ -157,7 +157,7 @@ const getVendorDashboardMetaService = async (userId: string) => {
   const lowStockProducts = allProducts.filter((product) => product.stock <= 10).length;
 
   // Function to generate sales data and customer growth
-  const { monthly, weekly, daily, uniqueCustomerGrowth } = generateSalesData(allOrders);
+  const { monthly, weekly, daily, monthlyDaysSales, uniqueCustomerGrowth } = generateSalesData(allOrders);
 
   // Collect the most recent reviews from all products
   const recentReviews = allProducts
@@ -181,6 +181,7 @@ const getVendorDashboardMetaService = async (userId: string) => {
         monthly,
         weekly,
         daily,
+        monthlyDaysSales,
       },
       recentOrders: allOrders.reverse(),
       products: allProducts,
