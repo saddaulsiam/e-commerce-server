@@ -9,14 +9,18 @@ const router = express.Router();
 router
   .route("/")
   .post(validateRequest(VendorValidation.createVendor), VendorsController.createVendor) // Create a new vendor
-  .get(VendorsController.getAllVendors); // Get all vendors
+  .get(auth("admin", "vendor"), VendorsController.getAllVendors); // Get all vendors
 
 router
   .route("/:id")
-  .get(VendorsController.getVendorByUserId) // Get vendor by ID
-  .put(VendorsController.updateVendor) // Update a vendor
-  .delete(VendorsController.deleteVendor); // Delete a vendor
+  .get(auth("admin", "vendor"), VendorsController.getVendorByUserId) // Get vendor by ID
+  .put(auth("admin", "vendor"), VendorsController.updateVendor) // Update a vendor
+  .delete(auth("admin", "vendor"), VendorsController.deleteVendor); // Delete a vendor
 
-router.get("/:id/customers", auth("vendor"), VendorsController.getVendorCustomers); // Get customers by vendor
+// Get customers by vendor
+router.get("/:id/customers", auth("vendor"), VendorsController.getVendorCustomers);
+
+// Get Dashboard Meta Data
+router.get("/dashboard/meta", auth("vendor"), VendorsController.getVendorDashboardMeta);
 
 export const VendorsRoutes = router;

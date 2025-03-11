@@ -1,15 +1,18 @@
 import httpStatus from "http-status";
 import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
+import Product from "../../Schema/Product";
 import SubOrder from "../../Schema/SubOrder";
 import User from "../../Schema/User";
 import Vendor from "../../Schema/Vendor";
+import { generateSalesData } from "../../utils/generateSalesData";
+import { calculatePagination } from "../../utils/paginationHelper";
+import { OrderStatus } from "../order/order.interface";
 import { USER_ROLE } from "../user/user.constant";
 import { TVendor } from "./vendor.interface";
-import { calculatePagination } from "../../utils/paginationHelper";
 
 //! Create Vendor with Transaction
-export const createVendorService = async (vendorData: TVendor) => {
+const createVendorService = async (vendorData: TVendor) => {
   // Start a Mongoose session and transaction
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -47,13 +50,13 @@ export const createVendorService = async (vendorData: TVendor) => {
 };
 
 //! Get all vendors
-export const getAllVendorsService = async () => {
+const getAllVendorsService = async () => {
   const vendors = await Vendor.find();
   return vendors;
 };
 
 //! Get vendor by UserID
-export const getVendorByUserIdService = async (userId: string) => {
+const getVendorByUserIdService = async (userId: string) => {
   const vendor = await Vendor.findOne({ userId: userId });
   if (!vendor) {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
@@ -62,7 +65,7 @@ export const getVendorByUserIdService = async (userId: string) => {
 };
 
 //! Update vendor by ID
-export const updateVendorService = async (vendorId: string, updateData: Partial<TVendor>) => {
+const updateVendorService = async (vendorId: string, updateData: Partial<TVendor>) => {
   const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, updateData, { new: true });
   if (!updatedVendor) {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
@@ -71,7 +74,7 @@ export const updateVendorService = async (vendorId: string, updateData: Partial<
 };
 
 //! Delete vendor by ID
-export const deleteVendorService = async (vendorId: string) => {
+const deleteVendorService = async (vendorId: string) => {
   const deletedVendor = await Vendor.findByIdAndDelete(vendorId);
   if (!deletedVendor) {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
@@ -80,7 +83,7 @@ export const deleteVendorService = async (vendorId: string) => {
 };
 
 //! Get customers by vendor
-export const getVendorCustomersService = async (params: any, options: any) => {
+const getVendorCustomersService = async (params: any, options: any) => {
   const { page, limit, skip } = calculatePagination(options);
   const { searchTerm, ...filterData } = params;
 
@@ -132,6 +135,61 @@ export const getVendorCustomersService = async (params: any, options: any) => {
   };
 };
 
+//! Get Vendor Dashboard Meta
+const getVendorDashboardMetaService = async (userId: string) => {
+  // Fetch Vendor by userId
+  const myVendor = await Vendor.findOne({ userId });
+  if (!myVendor) throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
+
+  // Fetch all orders for the vendor
+  const allOrders = await SubOrder.find({ vendorId: myVendor._id });
+
+  // Fetch all products for the vendor
+  const allProducts = await Product.find({ supplier: myVendor._id });
+
+  // Calculate sales & stats dynamically
+  const totalSales = allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const pendingOrders = allOrders.filter(
+    (order) => order.status === OrderStatus.PENDING || order.status === OrderStatus.PROCESSING
+  ).length;
+  const completedOrders = allOrders.filter((order) => order.status === OrderStatus.DELIVERED).length;
+  const cancelledOrders = allOrders.filter((order) => order.status === OrderStatus.CANCELLED).length;
+  const lowStockProducts = allProducts.filter((product) => product.stock <= 10).length;
+
+  // Function to generate sales data and customer growth
+  const { monthly, weekly, daily, uniqueCustomerGrowth } = generateSalesData(allOrders);
+
+  // Collect the most recent reviews from all products
+  const recentReviews = allProducts
+    .flatMap((product) => product.reviews)
+    .filter((review) => review?.createdAt)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10);
+
+  // Return data in the desired format
+  return {
+    meta: {
+      overview: {
+        totalSales,
+        pendingOrders,
+        completedOrders,
+        cancelledOrders,
+        lowStockProducts,
+        monthlyEarnings: totalSales * 0.2,
+      },
+      salesData: {
+        monthly,
+        weekly,
+        daily,
+      },
+      recentOrders: allOrders.reverse(),
+      products: allProducts,
+      reviews: recentReviews,
+      customerGrowth: uniqueCustomerGrowth,
+    },
+  };
+};
+
 export const VendorsServices = {
   createVendorService,
   getAllVendorsService,
@@ -139,4 +197,5 @@ export const VendorsServices = {
   updateVendorService,
   deleteVendorService,
   getVendorCustomersService,
+  getVendorDashboardMetaService,
 };

@@ -1,9 +1,9 @@
 import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
-import sendResponse from "../../utils/sendResponse";
-import { VendorsServices } from "./vendor.service";
 import pick from "../../utils/pick";
+import sendResponse from "../../utils/sendResponse";
 import { vendorFilterableFields } from "./vendor.constant";
+import { VendorsServices } from "./vendor.service";
 
 //! Create Vendor
 const createVendor = catchAsync(async (req, res) => {
@@ -87,6 +87,19 @@ const getVendorCustomers = catchAsync(async (req, res) => {
   });
 });
 
+//! Get Vendor Dashboard Meta Data
+const getVendorDashboardMeta = catchAsync(async (req, res) => {
+  const userId = req.user._id;
+  const result = await VendorsServices.getVendorDashboardMetaService(userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Meta Data retrieved successfully!",
+    data: result,
+  });
+});
+
 export const VendorsController = {
   createVendor,
   getAllVendors,
@@ -94,4 +107,5 @@ export const VendorsController = {
   updateVendor,
   deleteVendor,
   getVendorCustomers,
+  getVendorDashboardMeta,
 };
