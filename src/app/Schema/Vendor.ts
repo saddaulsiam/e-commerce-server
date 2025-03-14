@@ -7,6 +7,7 @@ const vendorSchema = new mongoose.Schema(
     storeDescription: { type: String, required: true },
     storeLogo: { type: String },
     storeBanner: { type: String },
+    phoneNumber: { type: Number },
     address: {
       street: { type: String, required: true },
       city: { type: String, required: true },

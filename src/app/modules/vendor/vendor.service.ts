@@ -65,8 +65,22 @@ const getVendorByUserIdService = async (userId: string) => {
 };
 
 //! Update vendor by ID
-const updateVendorService = async (vendorId: string, updateData: Partial<TVendor>) => {
+const updateVendorService = async (vendorId: string, data: any) => {
+  const updateData: Partial<TVendor> = {
+    storeName: data.storeName,
+    storeLogo: data.storeLogo,
+    storeBanner: data.storeBanner,
+    phoneNumber: data.phoneNumber,
+    address: {
+      street: data.street,
+      city: data.city,
+      area: data.area,
+      address: data.address,
+    },
+  };
+
   const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, updateData, { new: true });
+
   if (!updatedVendor) {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }

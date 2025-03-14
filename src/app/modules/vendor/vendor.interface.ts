@@ -5,6 +5,7 @@ import { TAddress } from "../user/user.interface";
 export interface TVendor extends Document {
   userId: Types.ObjectId;
   storeName: string;
+  phoneNumber: string;
   storeDescription: string;
   storeLogo?: string;
   storeBanner?: string;

@@ -13,9 +13,9 @@ export interface TUser extends Document {
 }
 
 export interface TAddress {
-  name: string;
-  email: string;
-  phoneNumber: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
   street: string;
   city: string;
   area: string;
