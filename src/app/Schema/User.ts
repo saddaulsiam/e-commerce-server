@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String },
     role: { type: String, enum: ["customer", "vendor"], default: "customer" },
     profile: { type: mongoose.Schema.Types.ObjectId, ref: "Profile" },
+    vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor" },
   },
   { timestamps: true }
 );

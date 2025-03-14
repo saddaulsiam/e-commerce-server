@@ -150,7 +150,7 @@ const refreshTokenService = async (token: string) => {
 
 //! Get my profile
 const getMeService = async (user: JwtPayload) => {
-  return await User.findById(user._id).populate("profile");
+  return await User.findById(user._id).populate("profile").populate("vendor");
 };
 
 export const AuthServices = {

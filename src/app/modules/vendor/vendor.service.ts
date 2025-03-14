@@ -34,7 +34,11 @@ const createVendorService = async (vendorData: TVendor) => {
     const newVendor = await Vendor.create([vendorData], { session });
 
     // Update user's role using the session
-    await User.findByIdAndUpdate(vendorData.userId, { $set: { role: USER_ROLE.vendor } }, { new: true, session });
+    await User.findByIdAndUpdate(
+      vendorData.userId,
+      { $set: { role: USER_ROLE.vendor, vendor: newVendor[0]._id } },
+      { new: true, session }
+    );
 
     // Commit the transaction
     await session.commitTransaction();
