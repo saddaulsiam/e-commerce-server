@@ -2,11 +2,11 @@ import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import Product from "../../Schema/Product";
 import { calculatePagination } from "../../utils/paginationHelper";
-import { productFilterableFields } from "./product.constant";
-import { TProduct } from "./product.interface";
+import { productSearchAbleFields } from "./product.constant";
+import { TProduct, TReview } from "./product.interface";
 
 //! Create a new product
-export const createProductService = async (productData: TProduct) => {
+const createProductService = async (productData: TProduct) => {
   const { name, vendorId } = productData;
 
   // Check if product already exists
@@ -24,47 +24,53 @@ export const createProductService = async (productData: TProduct) => {
 //! Get all products
 const getAllProductsService = async (params: any, options: any) => {
   const { page, limit, skip } = calculatePagination(options);
-  const { date, searchTerm, ...filterData } = params;
+  const { date, searchTerm, minPrice, maxPrice, ...filterData } = params;
 
   const query: any = {};
 
+  // Handle search term
   if (searchTerm) {
-    query.$or = productFilterableFields.map((field) => ({
+    query.$or = productSearchAbleFields.map((field) => ({
       [field]: { $regex: searchTerm, $options: "i" },
     }));
   }
 
+  // Handle price range
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = Number(minPrice);
+    if (maxPrice) query.price.$lte = Number(maxPrice);
+  }
+
+  // Handle other filters
   if (Object.keys(filterData).length > 0) {
     Object.keys(filterData).forEach((key) => {
       query[key] = filterData[key];
     });
   }
 
+  // Sorting
   const sortOptions: { [key: string]: 1 | -1 } = {};
-
   if (options.sortBy && options.sortOrder) {
-    sortOptions[options.sortBy as string] = options.sortOrder === "asc" ? 1 : -1;
+    sortOptions[options.sortBy] = options.sortOrder === "asc" ? 1 : -1;
   } else {
     sortOptions.createdAt = -1;
   }
 
+  // Execute query
   const result = await Product.find(query).populate("supplier").sort(sortOptions).skip(skip).limit(limit);
 
   const total = await Product.countDocuments(query);
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
+    meta: { page, limit, total },
     data: result,
   };
 };
 
 //! Get product by ID
-export const getProductByIdService = async (productId: string) => {
-  const product = await Product.findById(productId);
+const getProductByIdService = async (productId: string) => {
+  const product = await Product.findById(productId).populate("supplier");
   if (!product) {
     throw new AppError(httpStatus.NOT_FOUND, "Product not found");
   }
@@ -72,7 +78,7 @@ export const getProductByIdService = async (productId: string) => {
 };
 
 //! Update product
-export const updateProductService = async (productId: string, updateData: Partial<TProduct>) => {
+const updateProductService = async (productId: string, updateData: Partial<TProduct>) => {
   const product = await Product.findById(productId);
   if (!product) {
     throw new AppError(httpStatus.NOT_FOUND, "Product not found");
@@ -84,7 +90,7 @@ export const updateProductService = async (productId: string, updateData: Partia
 };
 
 //! Delete product
-export const deleteProductService = async (productId: string) => {
+const deleteProductService = async (productId: string) => {
   const product = await Product.findById(productId);
   if (!product) {
     throw new AppError(httpStatus.NOT_FOUND, "Product not found");
@@ -96,12 +102,23 @@ export const deleteProductService = async (productId: string) => {
 };
 
 //! Get products by vendor ID
-export const getProductsByVendorService = async (vendorId: string) => {
+const getProductsByVendorService = async (vendorId: string) => {
   const products = await Product.find({ vendorId });
   if (!products.length) {
     throw new AppError(httpStatus.NOT_FOUND, "No products found for this vendor");
   }
   return products;
+};
+
+//! Make Product Review
+const makeProductReviewService = async (productId: string, reviewData: TReview) => {
+  const updatedProduct = await Product.findByIdAndUpdate(productId, { $push: { reviews: reviewData } }, { new: true });
+
+  if (!updatedProduct) {
+    throw new Error("Product not found");
+  }
+
+  return updatedProduct;
 };
 
 export const ProductsServices = {
@@ -111,4 +128,5 @@ export const ProductsServices = {
   getProductByIdService,
   deleteProductService,
   getProductsByVendorService,
+  makeProductReviewService,
 };

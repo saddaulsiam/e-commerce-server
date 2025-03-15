@@ -14,6 +14,8 @@ router
   .put(ProductsController.updateProduct) // Update a product
   .delete(ProductsController.deleteProduct); // Delete a product
 
+router.post("/review/:id", ProductsController.makeProductReview); // make review
+
 router.get("/vendor/:vendorId", ProductsController.getProductsByVendor); // Get products by vendor
 
 export const ProductsRoutes = router;

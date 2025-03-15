@@ -85,6 +85,19 @@ const getProductsByVendor = catchAsync(async (req, res) => {
   });
 });
 
+//! make Product Review
+const makeProductReview = catchAsync(async (req, res) => {
+  const productId = req.params.id;
+  const result = await ProductsServices.makeProductReviewService(productId, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Review successfully submit",
+    data: result,
+  });
+});
+
 export const ProductsController = {
   createProduct,
   getAllProducts,
@@ -92,4 +105,5 @@ export const ProductsController = {
   getProductById,
   deleteProduct,
   getProductsByVendor,
+  makeProductReview,
 };

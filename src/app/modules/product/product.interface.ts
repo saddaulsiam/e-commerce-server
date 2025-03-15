@@ -14,3 +14,12 @@ export interface TProduct extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface TReview {
+  _id: string;
+  name: string;
+  photo: string;
+  rating: number;
+  message: string;
+  createdAt?: string;
+}
