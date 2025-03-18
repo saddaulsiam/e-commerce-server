@@ -68,6 +68,15 @@ const getVendorByUserIdService = async (userId: string) => {
   return vendor;
 };
 
+//! Get vendor by UserID
+const getVendorByNameService = async (vendorName: string) => {
+  const vendor = await Vendor.findOne({ storeName: vendorName });
+  if (!vendor) {
+    throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
+  }
+  return vendor;
+};
+
 //! Update vendor by ID
 const updateVendorService = async (vendorId: string, data: any) => {
   const updateData: Partial<TVendor> = {
@@ -213,6 +222,7 @@ export const VendorsServices = {
   createVendorService,
   getAllVendorsService,
   getVendorByUserIdService,
+  getVendorByNameService,
   updateVendorService,
   deleteVendorService,
   getVendorCustomersService,

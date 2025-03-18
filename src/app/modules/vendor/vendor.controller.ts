@@ -43,6 +43,19 @@ const getVendorByUserId = catchAsync(async (req, res) => {
   });
 });
 
+//! Get vendor by UserId
+const getVendorByName = catchAsync(async (req, res) => {
+  const vendorName = req.params.name;
+  const result = await VendorsServices.getVendorByNameService(vendorName);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Vendor retrieved successfully!",
+    data: result,
+  });
+});
+
 //! Update vendor by ID
 const updateVendor = catchAsync(async (req, res) => {
   const vendorId = req.params.id;
@@ -104,6 +117,7 @@ export const VendorsController = {
   createVendor,
   getAllVendors,
   getVendorByUserId,
+  getVendorByName,
   updateVendor,
   deleteVendor,
   getVendorCustomers,

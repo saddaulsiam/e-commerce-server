@@ -1,8 +1,8 @@
 import express from "express";
-import { VendorsController } from "./vendor.controller";
-import validateRequest from "../../middleware/validateRequest";
-import { VendorValidation } from "./vendor.validation";
 import auth from "../../middleware/auth";
+import validateRequest from "../../middleware/validateRequest";
+import { VendorsController } from "./vendor.controller";
+import { VendorValidation } from "./vendor.validation";
 
 const router = express.Router();
 
@@ -10,6 +10,8 @@ router
   .route("/")
   .post(validateRequest(VendorValidation.createVendor), VendorsController.createVendor) // Create a new vendor
   .get(auth("admin", "vendor"), VendorsController.getAllVendors); // Get all vendors
+
+router.get("/:name", VendorsController.getVendorByName); // Get vendor by name
 
 router
   .route("/:id")
