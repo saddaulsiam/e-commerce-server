@@ -15,6 +15,7 @@ const profileSchema = new mongoose.Schema(
       },
     ],
     photo: { type: String, default: "" },
+    birthDate: { type: String, default: "" },
     orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order", default: [] }],
   },
   { timestamps: true }

@@ -11,11 +11,14 @@ const zodShippingAddress = z.object({
 });
 
 const subOrderSchema = z.object({
-  name: z.string({ required_error: "Name is required" }),
-  productId: z.string().length(24, "Invalid product ID format"),
-  quantity: z.number().int().positive("Quantity must be a positive integer"),
-  price: z.number().nonnegative("Price must be a non-negative number"),
-  vendorId: z.string().length(24, "Invalid vendor ID format"),
+  productId: z.string(),
+  vendorId: z.string(),
+  name: z.string(),
+  image: z.string().url(),
+  price: z.number().nonnegative(),
+  quantity: z.number().int().nonnegative(),
+  color: z.string().optional(),
+  size: z.string().optional(),
 });
 
 const createOrder = z.object({
@@ -23,8 +26,10 @@ const createOrder = z.object({
     userId: z.string().length(24, "Invalid user ID format"),
     totalAmount: z.number().nonnegative("Total amount must be a non-negative number"),
     paymentMethod: z.enum(["stripe", "sslCommerz", "cashOnDelivery"]),
-    status: z.enum(["pending", "processing", "shipped", "delivered", "canceled"]).default("pending"),
+    isPaid: z.boolean().default(false),
+    paymentStatus: z.enum(["unpaid", "paid", "refunded"]),
     shippingAddress: zodShippingAddress,
+    status: z.enum(["pending", "processing", "shipped", "delivered", "canceled"]).default("pending"),
     subOrders: z.array(subOrderSchema).min(1, "At least one sub-order is required"),
   }),
 });

@@ -1,6 +1,7 @@
 import express from "express";
-import { UsersControllers } from "./user.controller";
+import auth from "../../middleware/auth";
 import validateRequest from "../../middleware/validateRequest";
+import { UsersControllers } from "./user.controller";
 import { UserValidation } from "./user.validation";
 
 const router = express.Router();
@@ -15,11 +16,11 @@ router
 router
   .route("/:id/profile")
   .get(UsersControllers.getUserProfile) // Get user profile
-  .put(UsersControllers.updateUserProfile); // Update user profile
+  .put(auth("customer", "vendor", "admin"), UsersControllers.updateUserProfile); // Update user profile
 
 router
   .route("/:id/address")
-  .post(validateRequest(UserValidation.newAddress), UsersControllers.AddNewAddress) // Add new address
-  .delete(); // Delete address //! add korte hobe;
+  .post(auth("customer", "vendor", "admin"), validateRequest(UserValidation.newAddress), UsersControllers.addNewAddress) // Add new address
+  .delete(auth("customer", "vendor", "admin"), UsersControllers.deleteAddress); // Delete address
 
 export const UsersRoutes = router;

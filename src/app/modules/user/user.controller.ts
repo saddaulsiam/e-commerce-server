@@ -56,8 +56,9 @@ const getUserProfile = catchAsync(async (req, res) => {
 
 // Update user profile
 const updateUserProfile = catchAsync(async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.params.id;
   const updateData = req.body;
+
   const result = await UsersServices.updateUserProfileService(userId, updateData);
 
   sendResponse(res, {
@@ -68,16 +69,31 @@ const updateUserProfile = catchAsync(async (req, res) => {
   });
 });
 
-// Add New Address
-const AddNewAddress = catchAsync(async (req, res) => {
+//! Add New Address
+const addNewAddress = catchAsync(async (req, res) => {
   const userId = req.params.id;
   const updateData = req.body;
-  const result = await UsersServices.AddNewAddressService(userId, updateData);
+  const result = await UsersServices.addNewAddressService(userId, updateData);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
     message: "New Address added successfully!",
+    data: result,
+  });
+});
+
+//! Add New Address
+const deleteAddress = catchAsync(async (req, res) => {
+  const userId = req.user._id;
+  const addressId = req.params.id;
+
+  const result = await UsersServices.deleteAddressService(userId, addressId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Removed address successfully!",
     data: result,
   });
 });
@@ -88,5 +104,6 @@ export const UsersControllers = {
   deleteUser,
   getUserProfile,
   updateUserProfile,
-  AddNewAddress,
+  addNewAddress,
+  deleteAddress,
 };

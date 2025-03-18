@@ -27,11 +27,13 @@ export enum PaymentMethod {
 // Sub-Order Interface
 export interface TSubOrder extends Document {
   name: string;
+  image: string;
   productId: string;
   vendorId: string;
   price: number;
   quantity: number;
-  imageUrl: string;
+  color: string;
+  size: string;
 }
 
 // Main Order Interface

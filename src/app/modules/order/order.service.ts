@@ -33,9 +33,12 @@ const createOrderService = async (orderData: TOrder) => {
       userId: order.userId,
       item: {
         name: subOrderData.name,
+        image: subOrderData.image,
         productId: subOrderData.productId,
         quantity: subOrderData.quantity,
         price: subOrderData.price,
+        color: subOrderData.color,
+        size: subOrderData.size,
       },
       totalAmount: subOrderData.price * subOrderData.quantity,
       paymentMethod: order.paymentMethod,
@@ -164,7 +167,13 @@ const getUserOrdersService = async (userId: string) => {
 
 //! Get Order By Id Service
 const getOrderByIdService = async (orderId: string) => {
-  const order = await Order.findById(orderId).populate("subOrders");
+  const order = await Order.findById(orderId).populate({
+    path: "subOrders",
+    populate: {
+      path: "item.productId",
+      model: "Product",
+    },
+  });
   if (!order) {
     throw new AppError(httpStatus.NOT_FOUND, "Order not found");
   }

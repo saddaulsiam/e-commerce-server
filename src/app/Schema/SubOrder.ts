@@ -23,12 +23,9 @@ const SubOrderSchema = new mongoose.Schema(
     },
     item: {
       name: { type: String, required: true, trim: true },
-      productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-        index: true,
-      },
+      image: { type: String, required: true },
+      size: { type: String, required: false },
+      color: { type: String, required: false },
       quantity: {
         type: Number,
         required: true,
@@ -38,6 +35,12 @@ const SubOrderSchema = new mongoose.Schema(
         type: Number,
         required: true,
         min: [0, "Price cannot be negative"],
+      },
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+        index: true,
       },
     },
     totalAmount: {

@@ -42,8 +42,9 @@ const getVendorOrders = catchAsync(async (req, res) => {
 });
 
 const getUserOrders = catchAsync(async (req, res) => {
-  const id = req.params.id;
+  const id = req.user._id;
   const result = await OrderServices.getUserOrdersService(id);
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -53,8 +54,9 @@ const getUserOrders = catchAsync(async (req, res) => {
 });
 
 const getOrderById = catchAsync(async (req, res) => {
-  const { orderId } = req.params;
+  const orderId = req.params.id;
   const result = await OrderServices.getOrderByIdService(orderId);
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
