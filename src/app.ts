@@ -15,7 +15,7 @@ app.use(cors({ origin: ["http://localhost:3000", "https://siam-store24.vercel.ap
 // Routes
 app.use("/api/v1", router);
 
-app.get("/", (_, res) => {
+app.get("/", (_req, res) => {
   res.send("Server is Running !");
 });
 
