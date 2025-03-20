@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String },
     role: { type: String, enum: ["customer", "vendor"], default: "customer" },
+    status: { type: String, enum: ["inactive", "active", "block", "deleted"] },
     profile: { type: mongoose.Schema.Types.ObjectId, ref: "Profile" },
     vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor" },
   },
