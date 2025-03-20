@@ -19,7 +19,7 @@ const createVendor = catchAsync(async (req, res) => {
 });
 
 //! Get all vendors
-const getAllVendors = catchAsync(async (req, res) => {
+const getAllVendors = catchAsync(async (_, res) => {
   const result = await VendorsServices.getAllVendorsService();
 
   sendResponse(res, {

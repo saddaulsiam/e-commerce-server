@@ -40,7 +40,7 @@ const createSSLPaymentIntentService = async (data: TOrder): Promise<string> => {
     shipping_method: "Courier",
     product_name: data.subOrders.map((product) => product.name).join(", "),
     product_category: "Electronics",
-    product_profile: data.subOrders.map((product) => product.imageUrl).join(", "),
+    product_profile: data.subOrders.map((product) => product.image).join(", "),
     cus_name: data.shippingAddress?.name,
     cus_email: data.shippingAddress?.email,
     cus_add1: data.shippingAddress.address,

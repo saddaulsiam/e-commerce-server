@@ -10,13 +10,13 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: ["http://localhost:3000"], credentials: true }));
+app.use(cors({ origin: ["http://localhost:3000", "https://siam-store24.vercel.app"], credentials: true }));
 
 // Routes
 app.use("/api/v1", router);
 
-app.get("/", (req, res) => {
-  res.send("Hi Next Level Developer !");
+app.get("/", (_, res) => {
+  res.send("Server is Running !");
 });
 
 app.use(globalErrorHandler);

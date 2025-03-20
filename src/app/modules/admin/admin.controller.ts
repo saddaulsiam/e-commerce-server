@@ -26,7 +26,7 @@ const loginAdmin = catchAsync(async (req, res) => {
   });
 });
 
-const getAllAdmins = catchAsync(async (req, res) => {
+const getAllAdmins = catchAsync(async (_, res) => {
   const result = await AdminServices.getAllAdminsService();
 
   sendResponse(res, {
