@@ -18,7 +18,7 @@ errorSources:[
 ]
 stack
 */
-const globalErrorHandler: ErrorRequestHandler = (err, _req, res) => {
+const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   //setting default values
   let statusCode = 500;
   let message = "Something went wrong!";
