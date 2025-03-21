@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { PaymentServices } from "./payment.service";
+import config from "../../config";
 
 //! Creating strip payment intent
 const createStipePaymentIntent = catchAsync(async (req, res) => {
@@ -32,18 +33,18 @@ const createSSLPaymentIntent = catchAsync(async (req, res) => {
 const sslPaymentSuccess = catchAsync(async (req, res) => {
   await PaymentServices.sslPaymentSuccessService(req.params.id);
 
-  res.redirect("http://localhost:3000/payment/success");
+  res.redirect(config.next_public_base_url + "/payment/success");
 });
 
-const sslPaymentCancel = catchAsync(async (req, res) => {
+const sslPaymentFail = catchAsync(async (req, res) => {
   await PaymentServices.sslPaymentFailOrCancelService(req.params.id);
 
-  res.redirect("http://localhost:3000/payment/cancel");
+  res.redirect(config.next_public_base_url + "/payment/fail");
 });
 
 export const PaymentController = {
   createStipePaymentIntent,
   createSSLPaymentIntent,
   sslPaymentSuccess,
-  sslPaymentCancel,
+  sslPaymentFail,
 };

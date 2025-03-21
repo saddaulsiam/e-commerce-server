@@ -23,6 +23,6 @@ router.post(
 
 router.post("/ssl-payment-success/:id", PaymentController.sslPaymentSuccess);
 
-router.post("/ssl-payment-cancel/:id", PaymentController.sslPaymentCancel);
+router.post("/ssl-payment-fail/:id", PaymentController.sslPaymentFail);
 
 export const PaymentRoutes = router;

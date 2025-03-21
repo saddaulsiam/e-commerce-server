@@ -34,9 +34,9 @@ const createSSLPaymentIntentService = async (data: TOrder): Promise<string> => {
     currency: "BDT",
     tran_id, // unique transaction id for each API call
     success_url: `http://localhost:5000/api/v1/payment/ssl-payment-success/${tran_id}`,
-    fail_url: `http://localhost:5000/api/v1/payment/ssl-payment-cancel/${tran_id}`,
-    cancel_url: `http://localhost:5000/api/v1/payment/ssl-payment-cancel/${tran_id}`,
-    ipn_url: `http://localhost:5000/api/v1/payment/ssl-payment-cancel/${tran_id}`,
+    fail_url: `http://localhost:5000/api/v1/payment/ssl-payment-fail/${tran_id}`,
+    cancel_url: `http://localhost:5000/api/v1/payment/ssl-payment-fail/${tran_id}`,
+    ipn_url: `http://localhost:5000/api/v1/payment/ssl-payment-fail/${tran_id}`,
     shipping_method: "Courier",
     product_name: data.subOrders.map((product) => product.name).join(", "),
     product_category: "Electronics",
