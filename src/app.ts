@@ -2,14 +2,16 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import notFound from "./app/middleware/APINotFound";
-import corsOptions from "./app/middleware/corsOptions";
+import { corsOptions } from "./app/middleware/corsOptions";
 import globalErrorHandler from "./app/middleware/globalErrorhandler";
 import router from "./app/routes";
 
 const app = express();
 
-// Middleware
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
+// Middleware
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
