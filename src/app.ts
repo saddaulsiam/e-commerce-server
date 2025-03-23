@@ -2,11 +2,17 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import notFound from "./app/middleware/APINotFound";
-import { corsOptions } from "./app/middleware/corsOptions";
 import globalErrorHandler from "./app/middleware/globalErrorhandler";
 import router from "./app/routes";
 
 const app = express();
+
+const corsOptions = {
+  origin: "https://siam-store24.vercel.app",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+};
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
