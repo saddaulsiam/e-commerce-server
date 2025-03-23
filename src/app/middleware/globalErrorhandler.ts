@@ -19,7 +19,6 @@ errorSources:[
 stack
 */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   //setting default values
   let statusCode = 500;
