@@ -19,8 +19,11 @@ const createVendor = catchAsync(async (req, res) => {
 });
 
 //! Get all vendors
-const getAllVendors = catchAsync(async (_req, res) => {
-  const result = await VendorsServices.getAllVendorsService();
+const getAllVendors = catchAsync(async (req, res) => {
+  const filters = pick(req.query, vendorFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await VendorsServices.getAllVendorsService(filters, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

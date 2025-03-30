@@ -5,6 +5,7 @@ import Admin from "../../Schema/Admin";
 import { TAdmin } from "./admin.interface";
 import { jwtHelpers } from "../../utils/jwtHelpers";
 import config from "../../config";
+import User from "../../Schema/User";
 
 //!  Register a new admin
 export const registerAdminService = async (userData: TAdmin) => {
@@ -102,8 +103,6 @@ export const deleteAdminService = async (adminId: string) => {
   if (!deletedAdmin) {
     throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
   }
-
-  return { message: "Admin deleted successfully" };
 };
 
 //!  Exporting all services

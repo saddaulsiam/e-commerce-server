@@ -16,6 +16,7 @@ const vendorSchema = new mongoose.Schema(
     },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     earnings: { type: Number, default: 0 },
+    status: { enum: ["inactive", "active", "block"], default: "inactive" },
   },
   { timestamps: true }
 );

@@ -10,6 +10,7 @@ import { calculatePagination } from "../../utils/paginationHelper";
 import { OrderStatus } from "../order/order.interface";
 import { USER_ROLE } from "../user/user.constant";
 import { TVendor } from "./vendor.interface";
+import { vendorSearchAbleFields } from "./vendor.constant";
 
 //! Create Vendor with Transaction
 const createVendorService = async (vendorData: TVendor) => {
@@ -54,9 +55,44 @@ const createVendorService = async (vendorData: TVendor) => {
 };
 
 //! Get all vendors
-const getAllVendorsService = async () => {
-  const vendors = await Vendor.find();
-  return vendors;
+const getAllVendorsService = async (params: any, options: any) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { date, searchTerm, ...filterData } = params;
+
+  const query: any = {};
+
+  if (searchTerm) {
+    query.$or = vendorSearchAbleFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    }));
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    Object.keys(filterData).forEach((key) => {
+      query[key] = filterData[key];
+    });
+  }
+
+  const sortOptions: { [key: string]: 1 | -1 } = {};
+
+  if (options.sortBy && options.sortOrder) {
+    sortOptions[options.sortBy as string] = options.sortOrder === "asc" ? 1 : -1;
+  } else {
+    sortOptions.createdAt = -1;
+  }
+
+  const result = await Vendor.find(query).sort(sortOptions).skip(skip).limit(limit);
+
+  const total = await Vendor.countDocuments(query);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 //! Get vendor by UserID

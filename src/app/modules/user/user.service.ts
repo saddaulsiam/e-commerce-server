@@ -1,14 +1,51 @@
-import AppError from "../../errors/AppError";
-import User from "../../Schema/User";
-import Profile from "../../Schema/Profile";
 import httpStatus from "http-status";
-import { TAddress } from "./user.interface";
 import mongoose from "mongoose";
+import AppError from "../../errors/AppError";
+import Profile from "../../Schema/Profile";
+import User from "../../Schema/User";
+import { calculatePagination } from "../../utils/paginationHelper";
+import { orderSearchAbleFields } from "./user.constant";
+import { TAddress } from "./user.interface";
 
 //! Get all users
-const getAllUsersService = async () => {
-  const users = await User.find();
-  return users;
+const getAllUsersService = async (params: any, options: any) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { date, searchTerm, ...filterData } = params;
+
+  const query: any = {};
+
+  if (searchTerm) {
+    query.$or = orderSearchAbleFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    }));
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    Object.keys(filterData).forEach((key) => {
+      query[key] = filterData[key];
+    });
+  }
+
+  const sortOptions: { [key: string]: 1 | -1 } = {};
+
+  if (options.sortBy && options.sortOrder) {
+    sortOptions[options.sortBy as string] = options.sortOrder === "asc" ? 1 : -1;
+  } else {
+    sortOptions.createdAt = -1;
+  }
+
+  const result = await User.find(query).sort(sortOptions).skip(skip).limit(limit).populate("profile");
+
+  const total = await User.countDocuments(query);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 //! Get user by ID

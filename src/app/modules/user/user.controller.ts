@@ -1,11 +1,16 @@
 import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
+import pick from "../../utils/pick";
 import sendResponse from "../../utils/sendResponse";
+import { userFilterableFields } from "./user.constant";
 import { UsersServices } from "./user.service";
 
 // Get all users
-const getAllUsers = catchAsync(async (_req, res) => {
-  const result = await UsersServices.getAllUsersService();
+const getAllUsers = catchAsync(async (req, res) => {
+  const filters = pick(req.query, userFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+
+  const result = await UsersServices.getAllUsersService(filters, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

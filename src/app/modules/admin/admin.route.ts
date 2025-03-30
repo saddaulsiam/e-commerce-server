@@ -1,8 +1,8 @@
 import express from "express";
-import { AdminsController } from "./admin.controller";
-import validateRequest from "../../middleware/validateRequest";
-import { AdminValidation } from "./admin.validation";
 import auth from "../../middleware/auth";
+import validateRequest from "../../middleware/validateRequest";
+import { AdminsController } from "./admin.controller";
+import { AdminValidation } from "./admin.validation";
 
 const router = express.Router();
 
@@ -17,13 +17,13 @@ router.post(
 router.post("/login", AdminsController.loginAdmin); // Admin login
 
 //! Admin management (only accessible by other admins)
-router.get("/", AdminsController.getAllAdmins); // Get all admins
-router.get("/:email", AdminsController.getAdminByEmail); // Get all admins
+router.get("/", auth("admin"), AdminsController.getAllAdmins); // Get all admins
+router.get("/:email", auth("admin"), AdminsController.getAdminByEmail); // Get admin by email
 
 router
   .route("/:id")
-  .get(AdminsController.getAdminById) // Get admin by ID
-  .put(AdminsController.updateAdmin) // Update admin profile
-  .delete(AdminsController.deleteAdmin); // Delete admin
+  .get(auth("admin"), AdminsController.getAdminById) // Get admin by ID
+  .put(auth("admin"), AdminsController.updateAdmin) // Update admin profile
+  .delete(auth("admin"), AdminsController.deleteAdmin); // Delete admin
 
 export const AdminsRoutes = router;
