@@ -9,8 +9,8 @@ import { generateSalesData } from "../../utils/generateSalesData";
 import { calculatePagination } from "../../utils/paginationHelper";
 import { OrderStatus } from "../order/order.interface";
 import { USER_ROLE } from "../user/user.constant";
-import { TVendor } from "./vendor.interface";
 import { vendorSearchAbleFields } from "./vendor.constant";
+import { TVendor } from "./vendor.interface";
 
 //! Create Vendor with Transaction
 const createVendorService = async (vendorData: TVendor) => {

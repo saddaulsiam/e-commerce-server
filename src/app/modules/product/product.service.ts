@@ -24,7 +24,7 @@ const createProductService = async (productData: TProduct) => {
 //! Get all products
 const getAllProductsService = async (params: any, options: any) => {
   const { page, limit, skip } = calculatePagination(options);
-  const { date, search, minPrice, maxPrice, ...filterData } = params;
+  const { search, minPrice, maxPrice, ...filterData } = params;
 
   const query: any = {};
 

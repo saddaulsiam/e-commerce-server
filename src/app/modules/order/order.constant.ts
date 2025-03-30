@@ -1,3 +1,3 @@
-export const orderSearchAbleFields: string[] = ["", ""];
+export const orderSearchAbleFields: string[] = ["id"];
 
-export const orderFilterableFields: string[] = ["vendorId", "orderId", "paymentStatus", "isPaid", "status"];
+export const orderFilterableFields: string[] = ["vendorId", "search", "paymentStatus", "isPaid", "status"];

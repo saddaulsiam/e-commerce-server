@@ -4,7 +4,7 @@ import Order from "../../Schema/Order";
 import SubOrder from "../../Schema/SubOrder";
 import AppError from "../../errors/AppError";
 import { calculatePagination } from "../../utils/paginationHelper";
-import { orderFilterableFields } from "./order.constant";
+import { orderFilterableFields, orderSearchAbleFields } from "./order.constant";
 import { TOrder } from "./order.interface";
 
 //! Create Order Service
@@ -71,15 +71,21 @@ const createOrderService = async (orderData: TOrder) => {
 
 //! Get All Orders
 const getAllOrdersService = async (params: any, options: any) => {
-  const { page, limit, skip } = calculatePagination(options);
-  const { date, searchTerm, ...filterData } = params;
+  const { limit, skip } = calculatePagination(options);
+  const { search, ...filterData } = params;
 
   const query: any = {};
 
-  if (searchTerm) {
-    query.$or = orderFilterableFields.map((field) => ({
-      [field]: { $regex: searchTerm, $options: "i" },
-    }));
+  if (search) {
+    // If the search string is a valid ObjectId, perform an exact match on _id
+    if (mongoose.Types.ObjectId.isValid(search)) {
+      query._id = search;
+    } else {
+      // Otherwise, use a regex search on the specified fields
+      query.$or = orderSearchAbleFields.map((field) => ({
+        [field]: { $regex: search, $options: "i" },
+      }));
+    }
   }
 
   if (Object.keys(filterData).length > 0) {
@@ -96,13 +102,13 @@ const getAllOrdersService = async (params: any, options: any) => {
     sortOptions.createdAt = -1;
   }
 
-  const result = await Order.find(query).sort(sortOptions).skip(skip).limit(limit);
+  const result = await Order.find(query).sort(sortOptions).skip(skip).limit(limit).populate("subOrders");
 
   const total = await Order.countDocuments(query);
 
   return {
     meta: {
-      page,
+      page: Math.ceil(total / limit),
       limit,
       total,
     },

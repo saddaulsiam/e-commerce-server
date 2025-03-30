@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const vendorSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+    email: { type: String, required: true },
     storeName: { type: String, required: true },
     storeDescription: { type: String, required: true },
     storeLogo: { type: String },
@@ -16,7 +17,7 @@ const vendorSchema = new mongoose.Schema(
     },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     earnings: { type: Number, default: 0 },
-    status: { enum: ["inactive", "active", "block"], default: "inactive" },
+    status: { type: String, enum: ["inactive", "active", "block"], default: "inactive" },
   },
   { timestamps: true }
 );
