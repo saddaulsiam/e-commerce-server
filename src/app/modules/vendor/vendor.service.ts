@@ -1,13 +1,11 @@
 import httpStatus from "http-status";
 import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
-import Product from "../../Schema/Product";
 import SubOrder from "../../Schema/SubOrder";
 import User from "../../Schema/User";
 import Vendor from "../../Schema/Vendor";
-import { generateSalesData } from "../../utils/generateSalesData";
+import { VisitorLog } from "../../Schema/VisitorLog";
 import { calculatePagination } from "../../utils/paginationHelper";
-import { OrderStatus } from "../order/order.interface";
 import { USER_ROLE } from "../user/user.constant";
 import { vendorSearchAbleFields } from "./vendor.constant";
 import { TVendor } from "./vendor.interface";
@@ -200,56 +198,60 @@ const getVendorCustomersService = async (params: any, options: any) => {
 
 //! Get Vendor Dashboard Meta
 const getVendorDashboardMetaService = async (userId: string) => {
-  // Fetch Vendor by userId
-  const myVendor = await Vendor.findOne({ userId });
-  if (!myVendor) throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
+  //! Fetch all needed data
+  const [allOrders, allVendors, allUsers, allVisitors] = await Promise.all([
+    SubOrder.find({}),
+    Vendor.find({}),
+    User.find({ role: "customer" }),
+    VisitorLog.find({}), // Optional: can be based on time range
+  ]);
 
-  // Fetch all orders for the vendor
-  const allOrders = await SubOrder.find({ vendorId: myVendor._id });
+  const totalVisitors = allVisitors.length;
+  const totalOrders = allOrders.length;
+  const totalRevenue = allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const monthlyEarnings = totalRevenue * 0.2; // Assuming 20% platform commission
 
-  // Fetch all products for the vendor
-  const allProducts = await Product.find({ supplier: myVendor._id });
+  // Sales Distribution
+  const orderStatusDistribution = allOrders.reduce((acc, order) => {
+    acc[order.status] = (acc[order.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
-  // Calculate sales & stats dynamically
-  const totalSales = allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-  const pendingOrders = allOrders.filter(
-    (order) => order.status === OrderStatus.PENDING || order.status === OrderStatus.PROCESSING
-  ).length;
-  const completedOrders = allOrders.filter((order) => order.status === OrderStatus.DELIVERED).length;
-  const cancelledOrders = allOrders.filter((order) => order.status === OrderStatus.CANCELLED).length;
-  const lowStockProducts = allProducts.filter((product) => product.stock <= 10).length;
+  // Top Vendors by Revenue
+  const vendorSalesMap: Record<string, number> = {};
+  allOrders.forEach((order) => {
+    const vendorId = order.vendorId.toString();
+    vendorSalesMap[vendorId] = (vendorSalesMap[vendorId] || 0) + order.totalAmount;
+  });
 
-  // Function to generate sales data and customer growth
-  const { monthly, weekly, daily, monthlyDaysSales, uniqueCustomerGrowth } = generateSalesData(allOrders);
+  const topVendors = Object.entries(vendorSalesMap)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([vendorId, revenue]) => {
+      const vendor = allVendors.find((v) => v._id.toString() === vendorId);
+      return {
+        vendorId,
+        name: vendor?.storeName || "Unknown Vendor",
+        revenue,
+      };
+    });
 
-  // Collect the most recent reviews from all products
-  const recentReviews = allProducts
-    .flatMap((product) => product.reviews)
-    .filter((review) => review?.createdAt)
+  // Recent Users
+  const recentUsers = allUsers
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10);
+    .slice(0, 5);
 
-  // Return data in the desired format
   return {
     meta: {
       overview: {
-        totalSales,
-        pendingOrders,
-        completedOrders,
-        cancelledOrders,
-        lowStockProducts,
-        monthlyEarnings: totalSales * 0.2,
+        totalVisitors,
+        totalOrders,
+        totalRevenue,
+        monthlyEarnings,
       },
-      salesData: {
-        monthly,
-        weekly,
-        daily,
-        monthlyDaysSales,
-      },
-      recentOrders: allOrders.reverse(),
-      products: allProducts,
-      reviews: recentReviews,
-      customerGrowth: uniqueCustomerGrowth,
+      salesDistribution: orderStatusDistribution,
+      topVendors,
+      recentUsers,
     },
   };
 };

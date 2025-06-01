@@ -6,6 +6,11 @@ import { TAdmin } from "./admin.interface";
 import { jwtHelpers } from "../../utils/jwtHelpers";
 import config from "../../config";
 import User from "../../Schema/User";
+import Vendor from "../../Schema/Vendor";
+import SubOrder from "../../Schema/SubOrder";
+import Product from "../../Schema/Product";
+import { OrderStatus } from "../order/order.interface";
+import { generateSalesData } from "../../utils/generateSalesData";
 
 //!  Register a new admin
 export const registerAdminService = async (userData: TAdmin) => {
@@ -105,6 +110,72 @@ export const deleteAdminService = async (adminId: string) => {
   }
 };
 
+//! Get Admin Dashboard Meta
+const adminDashboardMetaService = async () => {
+  // Fetch all vendors, orders, and products
+  const allVendors = await Vendor.find({});
+  const allOrders = await SubOrder.find({});
+  const allProducts = await Product.find({});
+  const allUsers = await User.find({ role: "customer" }); // Assuming user roles exist
+
+  // Calculate platform-wide stats
+  const totalSales = allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const pendingOrders = allOrders.filter(
+    (order) => order.status === OrderStatus.PENDING || order.status === OrderStatus.PROCESSING
+  ).length;
+  const completedOrders = allOrders.filter((order) => order.status === OrderStatus.DELIVERED).length;
+  const cancelledOrders = allOrders.filter((order) => order.status === OrderStatus.CANCELLED).length;
+  const lowStockProducts = allProducts.filter((product) => product.stock <= 10).length;
+
+  // Sales data & customer growth
+  const { monthly, weekly, daily, monthlyDaysSales, uniqueCustomerGrowth } = generateSalesData(allOrders);
+
+  // Most recent reviews
+  const recentReviews = allProducts
+    .flatMap((product) => product.reviews)
+    .filter((review) => review?.createdAt)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10);
+
+  // Most recent vendors
+  const recentVendors = allVendors
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+
+  // Most recent users (customers)
+  const recentCustomers = allUsers
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+
+  // Return formatted data
+  return {
+    meta: {
+      overview: {
+        totalVendors: allVendors.length,
+        totalCustomers: allUsers.length,
+        totalSales,
+        pendingOrders,
+        completedOrders,
+        cancelledOrders,
+        lowStockProducts,
+        monthlyEarnings: totalSales * 0.2, // Assuming 20% commission
+      },
+      salesData: {
+        monthly,
+        weekly,
+        daily,
+        monthlyDaysSales,
+      },
+      recentOrders: allOrders.reverse().slice(0, 10),
+      recentVendors,
+      recentCustomers,
+      products: allProducts,
+      reviews: recentReviews,
+      customerGrowth: uniqueCustomerGrowth,
+    },
+  };
+};
+
 //!  Exporting all services
 export const AdminServices = {
   registerAdminService,
@@ -114,4 +185,5 @@ export const AdminServices = {
   getAdminByEmailService,
   updateAdminService,
   deleteAdminService,
+  adminDashboardMetaService,
 };

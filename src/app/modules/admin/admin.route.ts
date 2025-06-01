@@ -26,4 +26,7 @@ router
   .put(auth("admin"), AdminsController.updateAdmin) // Update admin profile
   .delete(auth("admin"), AdminsController.deleteAdmin); // Delete admin
 
+// Get Dashboard Meta Data
+router.get("/dashboard/meta", /* auth("admin"), */ AdminsController.getAdminDashboardMeta); // Get admin dashboard meta data
+
 export const AdminsRoutes = router;

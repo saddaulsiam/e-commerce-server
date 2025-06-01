@@ -86,6 +86,17 @@ const deleteAdmin = catchAsync(async (req, res) => {
   });
 });
 
+const getAdminDashboardMeta = catchAsync(async (req, res) => {
+  const result = await AdminServices.adminDashboardMetaService();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin deleted successfully!",
+    data: result,
+  });
+});
+
 export const AdminsController = {
   registerAdmin,
   loginAdmin,
@@ -94,4 +105,5 @@ export const AdminsController = {
   getAdminByEmail,
   updateAdmin,
   deleteAdmin,
+  getAdminDashboardMeta,
 };
