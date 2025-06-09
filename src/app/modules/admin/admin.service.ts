@@ -1,16 +1,17 @@
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
+import config from "../../config";
 import AppError from "../../errors/AppError";
 import Admin from "../../Schema/Admin";
-import { TAdmin } from "./admin.interface";
-import { jwtHelpers } from "../../utils/jwtHelpers";
-import config from "../../config";
+import Product from "../../Schema/Product";
+import SubOrder from "../../Schema/SubOrder";
 import User from "../../Schema/User";
 import Vendor from "../../Schema/Vendor";
-import SubOrder from "../../Schema/SubOrder";
-import Product from "../../Schema/Product";
-import { OrderStatus } from "../order/order.interface";
+import { VisitorLog } from "../../Schema/VisitorLog";
 import { generateSalesData } from "../../utils/generateSalesData";
+import { jwtHelpers } from "../../utils/jwtHelpers";
+import { OrderStatus } from "../order/order.interface";
+import { TAdmin } from "./admin.interface";
 
 //!  Register a new admin
 export const registerAdminService = async (userData: TAdmin) => {
@@ -112,66 +113,106 @@ export const deleteAdminService = async (adminId: string) => {
 
 //! Get Admin Dashboard Meta
 const adminDashboardMetaService = async () => {
-  // Fetch all vendors, orders, and products
-  const allVendors = await Vendor.find({});
-  const allOrders = await SubOrder.find({});
-  const allProducts = await Product.find({});
-  const allUsers = await User.find({ role: "customer" }); // Assuming user roles exist
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  // Calculate platform-wide stats
-  const totalSales = allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-  const pendingOrders = allOrders.filter(
-    (order) => order.status === OrderStatus.PENDING || order.status === OrderStatus.PROCESSING
-  ).length;
-  const completedOrders = allOrders.filter((order) => order.status === OrderStatus.DELIVERED).length;
-  const cancelledOrders = allOrders.filter((order) => order.status === OrderStatus.CANCELLED).length;
-  const lowStockProducts = allProducts.filter((product) => product.stock <= 10).length;
+  const [vendors, orders, products, customers, visitors] = await Promise.all([
+    Vendor.find({}),
+    SubOrder.find({}),
+    Product.find({}),
+    User.find({ role: "customer" }),
+    VisitorLog.find({}),
+  ]);
 
-  // Sales data & customer growth
-  const { monthly, weekly, daily, monthlyDaysSales, uniqueCustomerGrowth } = generateSalesData(allOrders);
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-  // Most recent reviews
-  const recentReviews = allProducts
-    .flatMap((product) => product.reviews)
-    .filter((review) => review?.createdAt)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10);
+  let totalRevenue = 0;
+  let weeklyRevenue = 0;
+  let monthlyRevenue = 0;
+  let yearlyRevenue = 0;
 
-  // Most recent vendors
-  const recentVendors = allVendors
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+  const monthlyRevenueMap: Record<number, number> = {};
 
-  // Most recent users (customers)
-  const recentCustomers = allUsers
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+  const orderStats = {
+    pending: 0,
+    completed: 0,
+    cancelled: 0,
+  };
 
-  // Return formatted data
+  const vendorRevenue: Record<string, number> = {};
+
+  orders.forEach((order) => {
+    const date = new Date(order.createdAt);
+    const amount = order.totalAmount;
+    const month = date.getMonth();
+    const vendorId = order.vendorId?.toString();
+
+    totalRevenue += amount;
+    if (date >= startOfWeek) weeklyRevenue += amount;
+    if (date >= startOfMonth) monthlyRevenue += amount;
+    if (date >= startOfYear) yearlyRevenue += amount;
+
+    monthlyRevenueMap[month] = (monthlyRevenueMap[month] || 0) + amount;
+
+    if (vendorId) {
+      vendorRevenue[vendorId] = (vendorRevenue[vendorId] || 0) + amount;
+    }
+
+    if (order.status === OrderStatus.DELIVERED) orderStats.completed++;
+    else if (order.status === OrderStatus.CANCELLED) orderStats.cancelled++;
+    else if ([OrderStatus.PENDING, OrderStatus.PROCESSING].includes(order.status)) {
+      orderStats.pending++;
+    }
+  });
+
+  const revenueData = monthNames.map((month, index) => ({
+    month,
+    revenue: monthlyRevenueMap[index] || 0,
+  }));
+
+  const lowStockProducts = products.filter((p) => p.stock <= 10).length;
+
+  const salesStats = generateSalesData(orders);
+
+  const topVendors = Object.entries(vendorRevenue)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([vendorId, revenue]) => {
+      const vendor = vendors.find((v) => v._id.toString() === vendorId);
+      return {
+        vendorId,
+        name: vendor?.storeName || "Unknown",
+        revenue,
+      };
+    });
+
   return {
     meta: {
       overview: {
-        totalVendors: allVendors.length,
-        totalCustomers: allUsers.length,
-        totalSales,
-        pendingOrders,
-        completedOrders,
-        cancelledOrders,
+        totalVisitors: visitors.length,
+        totalVendors: vendors.length,
+        totalCustomers: customers.length,
+        totalSales: totalRevenue,
+        weeklyRevenue,
+        monthlyRevenue,
+        yearlyRevenue,
+        pendingOrders: orderStats.pending,
+        completedOrders: orderStats.completed,
+        cancelledOrders: orderStats.cancelled,
         lowStockProducts,
-        monthlyEarnings: totalSales * 0.2, // Assuming 20% commission
+        monthlyEarnings: totalRevenue * 0.2,
       },
       salesData: {
-        monthly,
-        weekly,
-        daily,
-        monthlyDaysSales,
+        ...salesStats,
       },
-      recentOrders: allOrders.reverse().slice(0, 10),
-      recentVendors,
-      recentCustomers,
-      products: allProducts,
-      reviews: recentReviews,
-      customerGrowth: uniqueCustomerGrowth,
+      revenueData, // 👈 Now returns as an array of { month, revenue }
+      recentOrders: orders.slice(-10).reverse(),
+      recentVendors: vendors.slice(-5).reverse(),
+      recentCustomers: customers.slice(-5).reverse(),
+      topVendors,
     },
   };
 };

@@ -92,7 +92,7 @@ const getAdminDashboardMeta = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Admin deleted successfully!",
+    message: "Admin dashboard meta retrieved",
     data: result,
   });
 });
