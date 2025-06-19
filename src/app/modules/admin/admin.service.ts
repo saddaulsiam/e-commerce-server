@@ -119,7 +119,7 @@ const adminDashboardMetaService = async () => {
     Vendor.find({}),
     SubOrder.find({}),
     Product.find({}),
-    User.find({ role: "customer" }),
+    User.find({ role: "customer" }).populate("profile"),
     VisitorLog.find({}),
   ]);
 
@@ -135,6 +135,7 @@ const adminDashboardMetaService = async () => {
   let yearlyRevenue = 0;
 
   const monthlyRevenueMap: Record<number, number> = {};
+  const yearlyRevenueMap: Record<number, number> = {};
 
   const orderStats = {
     pending: 0,
@@ -148,6 +149,7 @@ const adminDashboardMetaService = async () => {
     const date = new Date(order.createdAt);
     const amount = order.totalAmount;
     const month = date.getMonth();
+    const year = date.getFullYear();
     const vendorId = order.vendorId?.toString();
 
     totalRevenue += amount;
@@ -156,6 +158,7 @@ const adminDashboardMetaService = async () => {
     if (date >= startOfYear) yearlyRevenue += amount;
 
     monthlyRevenueMap[month] = (monthlyRevenueMap[month] || 0) + amount;
+    yearlyRevenueMap[year] = (yearlyRevenueMap[year] || 0) + amount;
 
     if (vendorId) {
       vendorRevenue[vendorId] = (vendorRevenue[vendorId] || 0) + amount;
@@ -163,14 +166,23 @@ const adminDashboardMetaService = async () => {
 
     if (order.status === OrderStatus.DELIVERED) orderStats.completed++;
     else if (order.status === OrderStatus.CANCELLED) orderStats.cancelled++;
-    else if ([OrderStatus.PENDING, OrderStatus.PROCESSING].includes(order.status)) {
+    else if ([OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.SHIPPED].includes(order.status as OrderStatus)) {
       orderStats.pending++;
     }
   });
 
-  const revenueData = monthNames.map((month, index) => ({
+  const monthly = monthNames.map((month, index) => ({
     month,
     revenue: monthlyRevenueMap[index] || 0,
+  }));
+
+  // After building yearlyRevenueMap
+  const currentYear = now.getFullYear();
+  const last3Years = [currentYear - 2, currentYear - 1, currentYear];
+
+  const yearly = last3Years.map((year) => ({
+    year,
+    revenue: yearlyRevenueMap[year] || 0,
   }));
 
   const lowStockProducts = products.filter((p) => p.stock <= 10).length;
@@ -183,9 +195,9 @@ const adminDashboardMetaService = async () => {
     .map(([vendorId, revenue]) => {
       const vendor = vendors.find((v) => v._id.toString() === vendorId);
       return {
-        vendorId,
         name: vendor?.storeName || "Unknown",
-        revenue,
+        sales: revenue,
+        products: vendor?.products.length || 0,
       };
     });
 
@@ -208,7 +220,14 @@ const adminDashboardMetaService = async () => {
       salesData: {
         ...salesStats,
       },
-      revenueData, // 👈 Now returns as an array of { month, revenue }
+      revenueData: {
+        monthly,
+        yearly: last3Years.map((year) => ({
+          year,
+          revenue: yearlyRevenueMap[year] || 0,
+        })),
+      },
+
       recentOrders: orders.slice(-10).reverse(),
       recentVendors: vendors.slice(-5).reverse(),
       recentCustomers: customers.slice(-5).reverse(),
