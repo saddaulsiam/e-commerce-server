@@ -201,6 +201,36 @@ const adminDashboardMetaService = async () => {
       };
     });
 
+  // Customer Growth Data
+  const monthlyCustomerGrowthMap: Record<number, number> = {};
+  const yearlyCustomerGrowthMap: Record<number, number> = {};
+
+  customers.forEach((customer) => {
+    const date = new Date(customer.createdAt);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    // Monthly map only for current year
+    if (year === currentYear) {
+      monthlyCustomerGrowthMap[month] = (monthlyCustomerGrowthMap[month] || 0) + 1;
+    }
+
+    // Yearly map
+    if (last3Years.includes(year)) {
+      yearlyCustomerGrowthMap[year] = (yearlyCustomerGrowthMap[year] || 0) + 1;
+    }
+  });
+
+  const monthlyCustomerGrowth = monthNames.map((month, index) => ({
+    month,
+    customers: monthlyCustomerGrowthMap[index] || 0,
+  }));
+
+  const yearlyCustomerGrowth = last3Years.map((year) => ({
+    year,
+    customers: yearlyCustomerGrowthMap[year] || 0,
+  }));
+
   return {
     meta: {
       overview: {
@@ -227,7 +257,10 @@ const adminDashboardMetaService = async () => {
           revenue: yearlyRevenueMap[year] || 0,
         })),
       },
-
+      customerGrowthData: {
+        monthly: monthlyCustomerGrowth,
+        yearly: yearlyCustomerGrowth,
+      },
       recentOrders: orders.slice(-10).reverse(),
       recentVendors: vendors.slice(-5).reverse(),
       recentCustomers: customers.slice(-5).reverse(),
