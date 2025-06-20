@@ -118,7 +118,9 @@ const getVendorDashboardMeta = catchAsync(async (req, res) => {
 
 const changeVendorStatus = catchAsync(async (req, res) => {
   const vendorId = req.params.id;
-  const status = req.body.status; // Assuming status is passed in the request body
+  const status = req.body.status;
+  console.log(status);
+
   const result = await VendorsServices.changeVendorStatusService(vendorId, status);
   sendResponse(res, {
     statusCode: httpStatus.OK,

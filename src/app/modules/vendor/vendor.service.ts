@@ -9,6 +9,7 @@ import { calculatePagination } from "../../utils/paginationHelper";
 import { USER_ROLE } from "../user/user.constant";
 import { vendorSearchAbleFields } from "./vendor.constant";
 import { TStatus, TVendor } from "./vendor.interface";
+import { stat } from "fs";
 
 //! Create Vendor with Transaction
 const createVendorService = async (vendorData: TVendor) => {
@@ -268,6 +269,7 @@ const changeVendorStatusService = async (vendorId: string, status: TStatus) => {
     TStatus.BLOCK,
     TStatus.PENDING,
     TStatus.PROCESSING,
+    TStatus.DELETED,
   ];
   if (!validStatuses.includes(status)) {
     throw new AppError(httpStatus.BAD_REQUEST, "Invalid status");
@@ -282,7 +284,7 @@ const changeVendorStatusService = async (vendorId: string, status: TStatus) => {
     throw new AppError(httpStatus.BAD_REQUEST, `Vendor is already ${status}`);
   }
   // Update vendor status
-  const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, { status }, { new: true });
+  const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, { status: status }, { new: true });
   if (!updatedVendor) {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
