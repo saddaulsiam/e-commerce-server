@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import AppError from "../../errors/AppError";
 import SubOrder from "../../Schema/SubOrder";
 import User from "../../Schema/User";
@@ -8,7 +8,7 @@ import { VisitorLog } from "../../Schema/VisitorLog";
 import { calculatePagination } from "../../utils/paginationHelper";
 import { USER_ROLE } from "../user/user.constant";
 import { vendorSearchAbleFields } from "./vendor.constant";
-import { TVendor } from "./vendor.interface";
+import { TStatus, TVendor } from "./vendor.interface";
 
 //! Create Vendor with Transaction
 const createVendorService = async (vendorData: TVendor) => {
@@ -256,6 +256,39 @@ const getVendorDashboardMetaService = async (userId: string) => {
   };
 };
 
+const changeVendorStatusService = async (vendorId: string, status: TStatus) => {
+  // Validate vendorId
+  if (!vendorId || !mongoose.isValidObjectId(vendorId)) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid vendor ID");
+  }
+  // Validate status
+  const validStatuses: TStatus[] = [
+    TStatus.ACTIVE,
+    TStatus.INACTIVE,
+    TStatus.BLOCK,
+    TStatus.PENDING,
+    TStatus.PROCESSING,
+  ];
+  if (!validStatuses.includes(status)) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid status");
+  }
+  // Check if vendor exists
+  const vendor = await Vendor.findById(vendorId);
+  if (!vendor) {
+    throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
+  }
+  // Check if the status is already set
+  if (vendor.status === status) {
+    throw new AppError(httpStatus.BAD_REQUEST, `Vendor is already ${status}`);
+  }
+  // Update vendor status
+  const updatedVendor = await Vendor.findByIdAndUpdate(vendorId, { status }, { new: true });
+  if (!updatedVendor) {
+    throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
+  }
+  return updatedVendor;
+};
+
 export const VendorsServices = {
   createVendorService,
   getAllVendorsService,
@@ -265,4 +298,5 @@ export const VendorsServices = {
   deleteVendorService,
   getVendorCustomersService,
   getVendorDashboardMetaService,
+  changeVendorStatusService,
 };

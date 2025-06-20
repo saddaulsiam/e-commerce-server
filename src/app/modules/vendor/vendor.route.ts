@@ -22,6 +22,9 @@ router
 // Get customers by vendor
 router.get("/:id/customers", auth("vendor"), VendorsController.getVendorCustomers);
 
+// Change vendor status
+router.put("/:id/status", auth("admin"), VendorsController.changeVendorStatus);
+
 // Get Dashboard Meta Data
 router.get("/dashboard/meta", auth("vendor"), VendorsController.getVendorDashboardMeta);
 
