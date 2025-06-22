@@ -16,10 +16,10 @@ export interface TAddress {
   name?: string;
   email?: string;
   phoneNumber?: string;
-  street: string;
+  region: string;
   city: string;
   area: string;
-  address: string;
+  street: string;
 }
 
 export interface TProfile extends Document {

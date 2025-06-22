@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
 import SubOrder from "../../Schema/SubOrder";
 import User from "../../Schema/User";
@@ -9,7 +9,6 @@ import { calculatePagination } from "../../utils/paginationHelper";
 import { USER_ROLE } from "../user/user.constant";
 import { vendorSearchAbleFields } from "./vendor.constant";
 import { TStatus, TVendor } from "./vendor.interface";
-import { stat } from "fs";
 
 //! Create Vendor with Transaction
 const createVendorService = async (vendorData: TVendor) => {
@@ -27,7 +26,7 @@ const createVendorService = async (vendorData: TVendor) => {
     // Check if vendor already exists using the session
     const existingVendor = await Vendor.findOne({ userId: vendorData.userId }).session(session);
     if (existingVendor) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Vendor already exists");
+      throw new AppError(httpStatus.BAD_REQUEST, "Vendor already exists, check your profile");
     }
 
     // Create new vendor using the session
@@ -49,7 +48,7 @@ const createVendorService = async (vendorData: TVendor) => {
     await session.abortTransaction();
     session.endSession();
 
-    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", error);
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `${error?.message || error}`, error);
   }
 };
 
@@ -120,10 +119,10 @@ const updateVendorService = async (vendorId: string, data: any) => {
     storeBanner: data.storeBanner,
     phoneNumber: data.phoneNumber,
     address: {
-      street: data.street,
+      region: data.address,
       city: data.city,
       area: data.area,
-      address: data.address,
+      street: data.street,
     },
   };
 
