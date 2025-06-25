@@ -9,6 +9,8 @@ import { calculatePagination } from "../../utils/paginationHelper";
 import { USER_ROLE } from "../user/user.constant";
 import { vendorSearchAbleFields } from "./vendor.constant";
 import { TStatus, TVendor } from "./vendor.interface";
+import Product from "../../Schema/Product";
+import { generateSalesData } from "../../utils/generateSalesData";
 
 //! Create Vendor with Transaction
 const createVendorService = async (vendorData: TVendor) => {
@@ -95,7 +97,7 @@ const getAllVendorsService = async (params: any, options: any) => {
 
 //! Get vendor by UserID
 const getVendorByUserIdService = async (userId: string) => {
-  const vendor = await Vendor.findOne({ userId: userId });
+  const vendor = await Vendor.findOne({ userId });
   if (!vendor) {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
@@ -196,68 +198,6 @@ const getVendorCustomersService = async (params: any, options: any) => {
   };
 };
 
-//! Get Vendor Dashboard Meta
-const getVendorDashboardMetaService = async (userId: string) => {
-  //! Fetch all needed data
-  const [allOrders, allVendors, allUsers, allVisitors] = await Promise.all([
-    SubOrder.find({}),
-    Vendor.find({}),
-    User.find({ role: "customer" }),
-    VisitorLog.find({}), // Optional: can be based on time range
-  ]);
-
-  console.log(allOrders.length);
-
-  const totalVisitors = allVisitors.length;
-  const totalOrders = allOrders.length;
-  const totalRevenue = allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-  const monthlyEarnings = totalRevenue * 0.2; // Assuming 20% platform commission
-
-  // Sales Distribution
-  const orderStatusDistribution = allOrders.reduce((acc, order) => {
-    acc[order.status] = (acc[order.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Top Vendors by Revenue
-  const vendorSalesMap: Record<string, number> = {};
-  allOrders.forEach((order) => {
-    const vendorId = order.vendorId.toString();
-    vendorSalesMap[vendorId] = (vendorSalesMap[vendorId] || 0) + order.totalAmount;
-  });
-
-  const topVendors = Object.entries(vendorSalesMap)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5)
-    .map(([vendorId, revenue]) => {
-      const vendor = allVendors.find((v) => v._id.toString() === vendorId);
-      return {
-        vendorId,
-        name: vendor?.storeName || "Unknown Vendor",
-        revenue,
-      };
-    });
-
-  // Recent Users
-  const recentUsers = allUsers
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
-
-  return {
-    meta: {
-      overview: {
-        totalVisitors,
-        totalOrders,
-        totalRevenue,
-        monthlyEarnings,
-      },
-      salesDistribution: orderStatusDistribution,
-      topVendors,
-      recentUsers,
-    },
-  };
-};
-
 const changeVendorStatusService = async (vendorId: string, status: TStatus) => {
   // Validate vendorId
   if (!vendorId || !mongoose.isValidObjectId(vendorId)) {
@@ -290,6 +230,64 @@ const changeVendorStatusService = async (vendorId: string, status: TStatus) => {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
   return updatedVendor;
+};
+
+//! Get Vendor Dashboard Meta
+const getVendorDashboardMetaService = async (userId: string) => {
+  const { id: vendorId } = await getVendorByUserIdService(userId);
+  if (!vendorId) {
+    throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
+  }
+
+  // Fetch everything in parallel
+  const [orders, lowStock, pendingOrders, recentOrders, products] = await Promise.all([
+    SubOrder.find({ vendorId }).lean(),
+    Product.countDocuments({ vendorId, stock: { $lt: 5 } }),
+    SubOrder.countDocuments({ vendorId, status: { $in: ["pending", "processing"] } }),
+    SubOrder.find({ vendorId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("orderId totalAmount shippingAddress status createdAt")
+      .lean(),
+    Product.find({ supplier: vendorId }).select("reviews").lean(),
+  ]);
+
+  // Total revenue from all orders
+  const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+  const earnings = (totalRevenue * 0.9).toFixed(2);
+
+  // Generate sales chart data
+  const salesStats = generateSalesData(orders);
+
+  // Flatten and extract recent customer reviews
+  const allReviews = products.flatMap((p) => p.reviews || []);
+
+  const reviews = allReviews
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5)
+    .map((r) => ({
+      name: r.name,
+      photo: r.photo,
+      rating: r.rating,
+      message: r.message,
+      createdAt: r.createdAt,
+    }));
+
+  return {
+    meta: {
+      overview: {
+        totalRevenue,
+        earnings,
+        lowStock,
+        pendingOrders,
+      },
+      salesData: {
+        ...salesStats,
+      },
+      recentOrders,
+      reviews,
+    },
+  };
 };
 
 export const VendorsServices = {

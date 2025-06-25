@@ -14,7 +14,7 @@ import { OrderStatus } from "../order/order.interface";
 import { TAdmin } from "./admin.interface";
 
 //!  Register a new admin
-export const registerAdminService = async (userData: TAdmin) => {
+const registerAdminService = async (userData: TAdmin) => {
   const { displayName, email, phoneNumber, password, role } = userData;
 
   // Check if admin already exists
@@ -40,7 +40,7 @@ export const registerAdminService = async (userData: TAdmin) => {
 };
 
 //!  Admin Login
-export const loginAdminService = async (email: string, password: string) => {
+const loginAdminService = async (email: string, password: string) => {
   const admin = await Admin.findOne({ email });
 
   if (!admin) {
@@ -68,13 +68,13 @@ export const loginAdminService = async (email: string, password: string) => {
 };
 
 //!  Get All Admins
-export const getAllAdminsService = async () => {
+const getAllAdminsService = async () => {
   const admins = await Admin.find();
   return admins;
 };
 
 //! Get Admin by ID
-export const getAdminByIdService = async (adminId: string) => {
+const getAdminByIdService = async (adminId: string) => {
   const admin = await Admin.findById(adminId);
   if (!admin) {
     throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
@@ -83,7 +83,7 @@ export const getAdminByIdService = async (adminId: string) => {
 };
 
 //! Get Admin by Email
-export const getAdminByEmailService = async (email: string) => {
+const getAdminByEmailService = async (email: string) => {
   const admin = await Admin.findOne({ email });
   if (!admin) {
     throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
@@ -92,7 +92,7 @@ export const getAdminByEmailService = async (email: string) => {
 };
 
 //! Update Admin
-export const updateAdminService = async (adminId: string, updateData: Partial<TAdmin>) => {
+const updateAdminService = async (adminId: string, updateData: Partial<TAdmin>) => {
   const updatedAdmin = await Admin.findByIdAndUpdate(adminId, updateData, { new: true });
 
   if (!updatedAdmin) {
@@ -103,7 +103,7 @@ export const updateAdminService = async (adminId: string, updateData: Partial<TA
 };
 
 //!  Delete Admin
-export const deleteAdminService = async (adminId: string) => {
+const deleteAdminService = async (adminId: string) => {
   const deletedAdmin = await Admin.findByIdAndDelete(adminId);
 
   if (!deletedAdmin) {
