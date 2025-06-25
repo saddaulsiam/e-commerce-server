@@ -239,29 +239,36 @@ const getVendorDashboardMetaService = async (userId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Vendor not found");
   }
 
+  // Get current year for customer growth
+  const currentYear = new Date().getFullYear();
+  const last3Years = [currentYear - 2, currentYear - 1, currentYear];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
   // Fetch everything in parallel
-  const [orders, lowStock, pendingOrders, recentOrders, products] = await Promise.all([
-    SubOrder.find({ vendorId }).lean(),
-    Product.countDocuments({ vendorId, stock: { $lt: 5 } }),
-    SubOrder.countDocuments({ vendorId, status: { $in: ["pending", "processing"] } }),
-    SubOrder.find({ vendorId })
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select("orderId totalAmount shippingAddress status createdAt")
-      .lean(),
-    Product.find({ supplier: vendorId }).select("reviews").lean(),
-  ]);
+  const [orders, lowStock, pendingOrders, completedOrders, cancelledOrders, recentOrders, products, uniqueCustomerIds] =
+    await Promise.all([
+      SubOrder.find({ vendorId }).lean(),
+      Product.countDocuments({ vendorId, stock: { $lt: 5 } }),
+      SubOrder.countDocuments({ vendorId, status: { $in: ["pending", "processing"] } }),
+      SubOrder.countDocuments({ vendorId, status: "completed" }),
+      SubOrder.countDocuments({ vendorId, status: "cancelled" }),
+      SubOrder.find({ vendorId })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select("orderId totalAmount shippingAddress status createdAt")
+        .lean(),
+      Product.find({ supplier: vendorId }).select("reviews").lean(),
+      SubOrder.distinct("userId", { vendorId }), // Unique user IDs who placed orders
+    ]);
 
-  // Total revenue from all orders
   const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-  const earnings = (totalRevenue * 0.9).toFixed(2);
+  const earnings = Number((totalRevenue * 0.9).toFixed(2));
 
-  // Generate sales chart data
+  // Sales chart data
   const salesStats = generateSalesData(orders);
 
-  // Flatten and extract recent customer reviews
+  // Extract and sort recent reviews
   const allReviews = products.flatMap((p) => p.reviews || []);
-
   const reviews = allReviews
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5)
@@ -273,6 +280,37 @@ const getVendorDashboardMetaService = async (userId: string) => {
       createdAt: r.createdAt,
     }));
 
+  // Get actual customer documents
+  const customers = await User.find({ _id: { $in: uniqueCustomerIds }, role: "customer" });
+
+  // Customer growth maps
+  const monthlyCustomerGrowthMap: Record<number, number> = {};
+  const yearlyCustomerGrowthMap: Record<number, number> = {};
+
+  customers.forEach((customer) => {
+    const date = new Date(customer.createdAt);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    if (year === currentYear) {
+      monthlyCustomerGrowthMap[month] = (monthlyCustomerGrowthMap[month] || 0) + 1;
+    }
+
+    if (last3Years.includes(year)) {
+      yearlyCustomerGrowthMap[year] = (yearlyCustomerGrowthMap[year] || 0) + 1;
+    }
+  });
+
+  const monthlyCustomerGrowth = monthNames.map((month, index) => ({
+    month,
+    customers: monthlyCustomerGrowthMap[index] || 0,
+  }));
+
+  const yearlyCustomerGrowth = last3Years.map((year) => ({
+    year,
+    customers: yearlyCustomerGrowthMap[year] || 0,
+  }));
+
   return {
     meta: {
       overview: {
@@ -280,12 +318,18 @@ const getVendorDashboardMetaService = async (userId: string) => {
         earnings,
         lowStock,
         pendingOrders,
+        completedOrders,
+        cancelledOrders,
       },
       salesData: {
         ...salesStats,
       },
       recentOrders,
       reviews,
+      customerGrowth: {
+        monthly: monthlyCustomerGrowth,
+        yearly: yearlyCustomerGrowth,
+      },
     },
   };
 };
