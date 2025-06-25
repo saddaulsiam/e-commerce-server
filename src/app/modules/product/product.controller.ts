@@ -98,6 +98,20 @@ const makeProductReview = catchAsync(async (req, res) => {
   });
 });
 
+//! Change vendor status
+const changeProductStatus = catchAsync(async (req, res) => {
+  const productId = req.params.id;
+  const status = req.body.status;
+
+  const result = await ProductsServices.changeProductStatusService(productId, status);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Product status updated successfully!",
+    data: result,
+  });
+});
+
 export const ProductsController = {
   createProduct,
   getAllProducts,
@@ -106,4 +120,5 @@ export const ProductsController = {
   deleteProduct,
   getProductsByVendor,
   makeProductReview,
+  changeProductStatus,
 };

@@ -6,6 +6,7 @@ import User from "../../Schema/User";
 import { calculatePagination } from "../../utils/paginationHelper";
 import { orderSearchAbleFields } from "./user.constant";
 import { TAddress } from "./user.interface";
+import { TStatus } from "../vendor/vendor.interface";
 
 //! Get all users
 const getAllUsersService = async (params: any, options: any) => {
@@ -143,6 +144,26 @@ const deleteAddressService = async (userId: string, addressId: string) => {
   return updatedProfile;
 };
 
+const changeUserStatusService = async (userId: string, status: TStatus) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  // Validate status
+  const validStatuses: TStatus[] = [TStatus.ACTIVE, TStatus.BLOCK, TStatus.DELETED];
+  if (!validStatuses.includes(status)) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid status");
+  }
+  // Check if the status is already set
+  if (user.status === status) {
+    throw new AppError(httpStatus.BAD_REQUEST, `User is already ${status}`);
+  }
+  // Update User status
+  const updatedUser = await User.findByIdAndUpdate(userId, { status: status }, { new: true });
+
+  return updatedUser;
+};
+
 export const UsersServices = {
   getAllUsersService,
   getUserByIdService,
@@ -151,4 +172,5 @@ export const UsersServices = {
   updateUserProfileService,
   addNewAddressService,
   deleteAddressService,
+  changeUserStatusService,
 };

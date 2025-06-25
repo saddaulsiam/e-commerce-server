@@ -26,4 +26,7 @@ export enum TStatus {
   ACTIVE = "active",
   BLOCK = "block",
   DELETED = "deleted",
+  INSTOCK = "in-stock",
+  OUTOFSTOCK = "out-of-stock",  
+  DISCONTINUED = "discontinued",
 }

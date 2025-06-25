@@ -4,6 +4,7 @@ import Product from "../../Schema/Product";
 import { calculatePagination } from "../../utils/paginationHelper";
 import { productSearchAbleFields } from "./product.constant";
 import { TProduct, TReview } from "./product.interface";
+import { TStatus } from "../vendor/vendor.interface";
 
 //! Create a new product
 const createProductService = async (productData: TProduct) => {
@@ -121,6 +122,38 @@ const makeProductReviewService = async (productId: string, reviewData: TReview) 
   return updatedProduct;
 };
 
+// ! Change product status
+const changeProductStatusService = async (productId: string, status: TStatus) => {
+  // Validate status
+  const validStatuses: TStatus[] = [
+    TStatus.ACTIVE,
+    TStatus.INACTIVE,
+    TStatus.BLOCK,
+    TStatus.PENDING,
+    TStatus.PROCESSING,
+    TStatus.DELETED,
+    TStatus.INSTOCK,
+    TStatus.OUTOFSTOCK,
+    TStatus.DISCONTINUED,
+  ];
+  if (!validStatuses.includes(status)) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid status");
+  }
+  // Check if product exists
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new AppError(httpStatus.NOT_FOUND, "Product not found");
+  }
+  // Check if the status is already set
+  if (product.status === (status as string)) {
+    throw new AppError(httpStatus.BAD_REQUEST, `Product is already ${status}`);
+  }
+  // Update vendor status
+  const updatedVendor = await Product.findByIdAndUpdate(productId, { status: status }, { new: true });
+
+  return updatedVendor;
+};
+
 export const ProductsServices = {
   createProductService,
   getAllProductsService,
@@ -129,4 +162,5 @@ export const ProductsServices = {
   deleteProductService,
   getProductsByVendorService,
   makeProductReviewService,
+  changeProductStatusService,
 };

@@ -103,6 +103,20 @@ const deleteAddress = catchAsync(async (req, res) => {
   });
 });
 
+//! Change Vendor Status
+const changeVendorStatus = catchAsync(async (req, res) => {
+  const userId = req.params.id;
+  const status = req.body.status;
+
+  const result = await UsersServices.changeUserStatusService(userId, status);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User status changed successfully!",
+    data: result,
+  });
+});
+
 export const UsersControllers = {
   getAllUsers,
   getUserById,
@@ -111,4 +125,5 @@ export const UsersControllers = {
   updateUserProfile,
   addNewAddress,
   deleteAddress,
+  changeVendorStatus,
 };

@@ -23,4 +23,7 @@ router
   .post(auth("customer", "vendor", "admin"), validateRequest(UserValidation.newAddress), UsersControllers.addNewAddress) // Add new address
   .delete(auth("customer", "vendor", "admin"), UsersControllers.deleteAddress); // Delete address
 
+// Change vendor status
+router.put("/:id/status", auth("admin"), UsersControllers.changeVendorStatus);
+
 export const UsersRoutes = router;

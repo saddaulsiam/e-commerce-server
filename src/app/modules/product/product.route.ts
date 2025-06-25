@@ -1,5 +1,6 @@
 import express from "express";
 import { ProductsController } from "./product.controller";
+import auth from "../../middleware/auth";
 
 const router = express.Router();
 
@@ -13,6 +14,8 @@ router
   .get(ProductsController.getProductById) // Get product by ID
   .put(ProductsController.updateProduct) // Update a product
   .delete(ProductsController.deleteProduct); // Delete a product
+
+router.put("/:id/status", auth("admin"), ProductsController.changeProductStatus); // Change product status
 
 router.post("/review/:id", ProductsController.makeProductReview); // make review
 
