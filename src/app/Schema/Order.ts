@@ -25,9 +25,9 @@ export const shippingAddressSchema = new mongoose.Schema({
     trim: true,
     match: [/^\d{11,11}$/, "Invalid phone number"], // Ensures valid number format
   },
-  street: {
+  region: {
     type: String,
-    required: [true, "Street is required"],
+    required: [true, "Region is required"],
     trim: true,
   },
   city: {
@@ -40,9 +40,9 @@ export const shippingAddressSchema = new mongoose.Schema({
     required: [true, "Area is required"],
     trim: true,
   },
-  address: {
+  street: {
     type: String,
-    required: [true, "Address is required"],
+    required: [true, "Street is required"],
     trim: true,
   },
 });

@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 const zodAddressSchema = z.object({
-  street: z.string().nonempty("Street is required"),
+  region: z.string().nonempty("Region is required"),
   city: z.string().nonempty("City is required"),
   area: z.string().nonempty("Area is required"),
-  region: z.string().nonempty("Address is required"),
+  street: z.string().nonempty("Street is required"),
 });
 
 const createVendor = z.object({

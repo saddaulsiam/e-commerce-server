@@ -119,7 +119,7 @@ const updateVendorService = async (vendorId: string, data: any) => {
     storeBanner: data.storeBanner,
     phoneNumber: data.phoneNumber,
     address: {
-      region: data.address,
+      region: data.region,
       city: data.city,
       area: data.area,
       street: data.street,
@@ -205,6 +205,8 @@ const getVendorDashboardMetaService = async (userId: string) => {
     User.find({ role: "customer" }),
     VisitorLog.find({}), // Optional: can be based on time range
   ]);
+
+  console.log(allOrders.length);
 
   const totalVisitors = allVisitors.length;
   const totalOrders = allOrders.length;

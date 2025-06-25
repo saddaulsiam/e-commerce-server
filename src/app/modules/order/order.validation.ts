@@ -4,10 +4,10 @@ const zodShippingAddress = z.object({
   name: z.string().nonempty("Name is required"),
   email: z.string().email("Invalid email address"),
   phoneNumber: z.string().nonempty("Phone number is required"),
-  street: z.string().nonempty("Street is required"),
+  region: z.string().nonempty("Region is required"),
   city: z.string().nonempty("City is required"),
   area: z.string().nonempty("Area is required"),
-  address: z.string().nonempty("Address is required"),
+  street: z.string().nonempty("Street is required"),
 });
 
 const subOrderSchema = z.object({
