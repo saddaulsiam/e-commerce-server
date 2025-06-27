@@ -7,5 +7,5 @@ export const USER_ROLE = {
 
 export const UserStatus = ["in-progress", "blocked"];
 
-export const userFilterableFields = [];
+export const userFilterableFields = ["role", "search", "status"];
 export const orderSearchAbleFields = [];
