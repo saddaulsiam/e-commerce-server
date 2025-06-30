@@ -97,7 +97,7 @@ const productSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["in-stock", "out-of-stock", "discontinued"],
+        values: ["in-stock", "out-of-stock", "discontinued", "active", "block", "deleted"],
         message: "Status must be either 'in-stock', 'out-of-stock', or 'discontinued'",
       },
       default: "in-stock",
