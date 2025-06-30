@@ -205,12 +205,24 @@ const updateOrderStatusService = async (orderId: string, status: string) => {
   return updatedOrder;
 };
 
+//! Update Order Status Service
+const updateSubOrderStatusService = async (orderId: string, status: string) => {
+  const updatedOrder = await SubOrder.findByIdAndUpdate(orderId, { status }, { new: true });
+
+  console.log(updatedOrder);
+  if (!updatedOrder) {
+    throw new AppError(httpStatus.NOT_FOUND, "Order not found");
+  }
+  return updatedOrder;
+};
+
 export const OrderServices = {
   createOrderService,
   getAllOrdersService,
   getVendorOrdersService,
   getUserOrdersService,
   getOrderByIdService,
-  updateOrderStatusService,
   getSuborderByIdService,
+  updateOrderStatusService,
+  updateSubOrderStatusService,
 };

@@ -78,9 +78,23 @@ const getSuborderById = catchAsync(async (req, res) => {
 });
 
 const updateOrderStatus = catchAsync(async (req, res) => {
-  const { orderId } = req.params;
+  const { id } = req.params;
   const { status } = req.body;
-  const result = await OrderServices.updateOrderStatusService(orderId, status);
+  const result = await OrderServices.updateOrderStatusService(id, status);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Order status updated successfully!",
+    data: result,
+  });
+});
+
+const updateSuborderStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const result = await OrderServices.updateSubOrderStatusService(id, status);
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -97,4 +111,5 @@ export const OrdersController = {
   getOrderById,
   getSuborderById,
   updateOrderStatus,
+  updateSuborderStatus,
 };

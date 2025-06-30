@@ -18,6 +18,7 @@ router.get("/my", auth("customer", "vendor", "admin"), OrdersController.getUserO
 router.get("/:id", OrdersController.getOrderById); // Get order by ID
 
 router.put("/:id/status", OrdersController.updateOrderStatus); // Update order status
+router.put("/suborder/:id/status", OrdersController.updateSuborderStatus); // Update suborder status
 
 router.get("/suborder/:id", OrdersController.getSuborderById); // Get suborder by ID
 
