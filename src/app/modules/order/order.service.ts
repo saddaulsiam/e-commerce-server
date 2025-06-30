@@ -186,6 +186,15 @@ const getOrderByIdService = async (orderId: string) => {
   return order;
 };
 
+//! Get Sub Order By Id Service
+const getSuborderByIdService = async (orderId: string) => {
+  const order = await SubOrder.findById(orderId).populate("userId");
+  if (!order) {
+    throw new AppError(httpStatus.NOT_FOUND, "Order not found");
+  }
+  return order;
+};
+
 //! Update Order Status Service
 const updateOrderStatusService = async (orderId: string, status: string) => {
   const updatedOrder = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
@@ -203,4 +212,5 @@ export const OrderServices = {
   getUserOrdersService,
   getOrderByIdService,
   updateOrderStatusService,
+  getSuborderByIdService,
 };
