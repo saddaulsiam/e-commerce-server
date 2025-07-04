@@ -3,6 +3,18 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AdminServices } from "./admin.service";
 
+const makeAdmin = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const result = await AdminServices.makeAdminService(email);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Admin registered successfully!",
+    data: result,
+  });
+});
+
 const registerAdmin = catchAsync(async (req, res) => {
   const result = await AdminServices.registerAdminService(req.body);
 
@@ -98,6 +110,7 @@ const getAdminDashboardMeta = catchAsync(async (req, res) => {
 });
 
 export const AdminsController = {
+  makeAdmin,
   registerAdmin,
   loginAdmin,
   getAllAdmins,

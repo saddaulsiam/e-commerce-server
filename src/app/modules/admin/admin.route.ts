@@ -16,6 +16,14 @@ router.post(
 
 router.post("/login", AdminsController.loginAdmin); // Admin login
 
+// temporary route for making an admin
+router.post(
+  "/make-admin",
+  auth("admin", "superAdmin"),
+  validateRequest(AdminValidation.makeAdmin),
+  AdminsController.makeAdmin
+); // Make an admin
+
 //! Admin management (only accessible by other admins)
 router.get("/", auth("admin"), AdminsController.getAllAdmins); // Get all admins
 router.get("/:email", auth("admin"), AdminsController.getAdminByEmail); // Get admin by email

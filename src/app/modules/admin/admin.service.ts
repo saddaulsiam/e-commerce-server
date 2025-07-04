@@ -14,6 +14,22 @@ import { OrderStatus } from "../order/order.interface";
 import { TAdmin } from "./admin.interface";
 
 //!  Register a new admin
+const makeAdminService = async (email: string) => {
+  // Check if admin already exists
+  const existingAdmin = await User.findOne({ email, role: "admin" });
+  if (existingAdmin) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Admin already exists");
+  }
+  // Update user role to admin
+  const updatedUser = await User.findOneAndUpdate({ email }, { role: "admin" }, { new: true });
+  if (!updatedUser) {
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to make admin");
+  }
+  // Return the newly created admin
+  return updatedUser;
+};
+
+//!  Register a new admin
 const registerAdminService = async (userData: TAdmin) => {
   const { displayName, email, phoneNumber, password, role } = userData;
 
@@ -271,6 +287,7 @@ const adminDashboardMetaService = async () => {
 
 //!  Exporting all services
 export const AdminServices = {
+  makeAdminService,
   registerAdminService,
   loginAdminService,
   getAllAdminsService,
