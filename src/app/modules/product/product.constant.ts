@@ -6,7 +6,7 @@ export const productFilterableFields: string[] = [
   "status",
   "category",
   "brand",
-  "colors",
+  "colors.label",
   "minPrice",
   "maxPrice",
 ];

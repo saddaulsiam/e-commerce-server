@@ -56,13 +56,15 @@ const productSchema = new mongoose.Schema(
     ],
     colors: [
       {
-        type: String,
-        required: [true, "At least one color is required"],
-        validate: {
-          validator: function (colors: string[]) {
-            return colors.length > 0;
-          },
-          message: "At least one color is required",
+        label: {
+          type: String,
+          required: [true, "Color label is required"],
+          trim: true,
+        },
+        color: {
+          type: String,
+          required: [true, "Color hex is required"],
+          trim: true,
         },
       },
     ],
