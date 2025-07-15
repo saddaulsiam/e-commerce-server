@@ -9,8 +9,8 @@ import router from "./app/routes";
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:3000",
-  // origin: "https://siam-store.vercel.app",
+  // origin: "http://localhost:3000",
+  origin: "https://siam-store.vercel.app",
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
