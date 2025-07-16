@@ -47,7 +47,7 @@ control the platform via dashboards.
 ### 1️⃣ Clone this repo
 
 ```bash
-  git clone https://github.com/saddaulsiam/e-commerce-client.git
+  git clone https://github.com/saddaulsiam/e-commerce-server.git
 ```
 
 ```bash
