@@ -64,6 +64,6 @@ control the platform via dashboards.
 
 ## 📣 Contact
 
-- Author: Your Name
+- Author: Saddaul Siam
 - Email: saddaulsiam@gmail.com
 - GitHub: @saddaulsiam
